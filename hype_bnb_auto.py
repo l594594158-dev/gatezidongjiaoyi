@@ -1,0 +1,502 @@
+#!/usr/bin/env python3
+"""
+HYPE 全自动交易机器人 - Binance 版
+框架与BTC完全一致：三周期EMA+ADX+DI判方向，4h EMA/Fib共振入场，ATR自适应止损。
+参数：10x杠杆，3 HYPE/笔。
+"""
+import ccxt, pandas as pd, numpy as np, time, json, os, traceback
+from datetime import datetime
+
+SYMBOL = 'HYPE/USDT:USDT'
+LEVERAGE = 10
+POSITION_SIZE = 3.0
+TIMEFRAMES = ['1h', '4h', '1d']
+SL_ATR_MULT = 1.5
+FIB_LEVELS = [0.236, 0.382]
+MIN_ADX = 25
+DI_RATIO = 1.5
+POLL_SECONDS = 300
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATE_FILE = os.path.join(SCRIPT_DIR, 'hype_bn_state.json')
+LOG_FILE = os.path.join(SCRIPT_DIR, 'hype_bn.log')
+TRADE_LOG = os.path.join(SCRIPT_DIR, 'hype_bn_trades.txt')
+
+API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
+API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
+
+def log(msg):
+    ts = datetime.now().strftime('%H:%M:%S')
+    line = f'[{ts}] {msg}'
+    print(line, flush=True)
+    with open(LOG_FILE, 'a') as f:
+        f.write(line + '\n')
+
+def log_trade(entry):
+    ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    action = entry.get('action')
+    d = entry.get('direction', '')
+    d_cn = '做空' if d == 'SHORT' else '做多'
+    lines = ['═══════════════════════════════════', f'时间: {ts}']
+    if action == 'OPEN':
+        lines += [
+            f'操作: 开仓{d_cn}',
+            f'数量: {entry.get("qty")} HYPE | 杠杆: {entry.get("leverage")}x',
+            f'入场价: {entry.get("entry_price")} USDT ({entry.get("entry_type","")})',
+            f'止损: {entry.get("sl")} USDT (-{entry.get("sl_pct")}%)',
+            f'止盈: {entry.get("tp")} USDT (+{entry.get("tp_pct")}%)',
+        ]
+    elif action == 'CLOSE':
+        lines += [
+            f'操作: 平仓{d_cn}',
+            f'数量: {entry.get("qty")} HYPE',
+            f'开仓价: {entry.get("entry_price")} USDT',
+            f'盈亏: {entry.get("upnl")} USDT',
+        ]
+    analysis = entry.get('analysis', {})
+    if analysis:
+        lines.append('── 分析依据 ──')
+        for tf_name, tf_data in analysis.get('timeframes', {}).items():
+            al = tf_data.get('alignment', '')
+            al_cn = '多头排列' if al == 'bull' else '空头排列'
+            lines.append(f'  {tf_name} EMA5={tf_data.get("ema5")} EMA10={tf_data.get("ema10")} -> {al_cn}')
+        h4 = analysis.get('4h', {})
+        if h4:
+            trend_word = '强趋势' if h4.get('adx', 0) > 25 else '震荡'
+            lines.append(f'  4h ADX={h4.get("adx")} {trend_word} +DI={h4.get("plus_di")} -DI={h4.get("minus_di")}')
+            lines.append(f'  4h ATR={h4.get("atr")} USDT ({h4.get("atr_pct")}%)')
+        for r in analysis.get('direction_rationale', {}).get('reasons', []):
+            lines.append(f'    * {r}')
+    lines += ['═══════════════════════════════════', '']
+    with open(TRADE_LOG, 'a') as f:
+        f.write('\n'.join(lines))
+
+def compute(df):
+    df['ema5'] = df['close'].ewm(span=5).mean()
+    df['ema10'] = df['close'].ewm(span=10).mean()
+    tr = pd.concat([df['high']-df['low'], abs(df['high']-df['close'].shift(1)), abs(df['low']-df['close'].shift(1))], axis=1).max(axis=1)
+    df['atr'] = tr.rolling(14).mean()
+    atr_s = df['atr']
+    up = df['high'] - df['high'].shift(1)
+    down = df['low'].shift(1) - df['low']
+    pdm = pd.Series(np.where((up > down) & (up > 0), up, 0), index=df.index)
+    ndm = pd.Series(np.where((down > up) & (down > 0), down, 0), index=df.index)
+    pdi = 100 * pdm.rolling(14).mean() / atr_s.replace(0, np.nan)
+    ndi = 100 * ndm.rolling(14).mean() / atr_s.replace(0, np.nan)
+    dx = 100 * abs(pdi - ndi) / (pdi + ndi).replace(0, np.nan)
+    df['adx'] = dx.rolling(14).mean()
+    df['plus_di'] = pdi
+    df['minus_di'] = ndi
+    return df
+
+class Analyzer:
+    def __init__(self, exchange):
+        self.ex = exchange
+        self.data = {}
+
+    def fetch(self):
+        for tf in TIMEFRAMES:
+            raw = self.ex.fetch_ohlcv(SYMBOL, tf, limit=100 if tf == '1h' else 60)
+            df = pd.DataFrame(raw, columns=['ts', 'open', 'high', 'low', 'close', 'vol'])
+            df['ts'] = pd.to_datetime(df['ts'], unit='ms')
+            df.set_index('ts', inplace=True)
+            self.data[tf] = compute(df)
+
+    @property
+    def price(self):
+        return self.data['1h']['close'].iloc[-1]
+
+    def direction(self):
+        h1 = self.data['1h']
+        h4 = self.data['4h']
+        d1 = self.data.get('1d')
+        last4 = h4.iloc[-1]
+
+        dfs = [h1, h4]
+        if d1 is not None and len(d1) > 0:
+            dfs.append(d1)
+
+        ema_bear = sum(1 for df in dfs if df['ema5'].iloc[-1] < df['ema10'].iloc[-1])
+        ema_bull = sum(1 for df in dfs if df['ema5'].iloc[-1] > df['ema10'].iloc[-1])
+
+        adx_ok = pd.notna(last4['adx']) and last4['adx'] > MIN_ADX
+        di_bear = (pd.notna(last4['minus_di']) and pd.notna(last4['plus_di']) and
+                   last4['minus_di'] > last4['plus_di'] * DI_RATIO)
+        di_bull = (pd.notna(last4['minus_di']) and pd.notna(last4['plus_di']) and
+                   last4['plus_di'] > last4['minus_di'] * DI_RATIO)
+
+        if ema_bear >= 2 and adx_ok and di_bear:
+            return 'SHORT'
+        if ema_bull >= 2 and adx_ok and di_bull:
+            return 'LONG'
+        return None
+
+    def plan(self):
+        d = self.direction()
+        if d is None:
+            return None
+        price = self.price
+        df4 = self.data['4h']
+        last4 = df4.iloc[-1]
+        r30 = df4.tail(30)
+        hi = r30['high'].max()
+        lo = r30['low'].min()
+        atr = last4['atr']
+
+        if d == 'SHORT':
+            levels = []
+            for name, v in [('4h_EMA5', last4['ema5']), ('4h_EMA10', last4['ema10'])]:
+                if pd.notna(v) and v > price:
+                    levels.append((v, name))
+            for fib in FIB_LEVELS:
+                lvl = lo + (hi - lo) * fib
+                if lvl > price:
+                    levels.append((lvl, f'Fib_{fib:.1%}'))
+            levels.sort()
+            entry = levels[0][0] if levels else price
+            ename = levels[0][1] if levels else 'market'
+            sl = entry + SL_ATR_MULT * atr
+            tp = lo
+        else:
+            levels = []
+            for name, v in [('4h_EMA5', last4['ema5']), ('4h_EMA10', last4['ema10'])]:
+                if pd.notna(v) and v < price:
+                    levels.append((v, name))
+            for fib in FIB_LEVELS:
+                lvl = hi - (hi - lo) * fib
+                if lvl < price:
+                    levels.append((lvl, f'Fib_{fib:.1%}'))
+            levels.sort(reverse=True)
+            entry = levels[0][0] if levels else price
+            ename = levels[0][1] if levels else 'market'
+            sl = entry - SL_ATR_MULT * atr
+            tp = hi
+
+        return {
+            'direction': d,
+            'entry': entry,
+            'entry_name': ename,
+            'sl': sl,
+            'tp': tp,
+            'atr': atr,
+            'price': price,
+            'analysis': self._analysis(d),
+        }
+
+    def _analysis(self, direction):
+        h1 = self.data['1h']
+        h4 = self.data['4h']
+        last4 = h4.iloc[-1]
+        r30 = h4.tail(30)
+        hi = r30['high'].max()
+        lo = r30['low'].min()
+        price = self.price
+
+        ema_data = {}
+        for tf_name, df in [('1h', h1), ('4h', h4)]:
+            lr = df.iloc[-1]
+            bull = lr['ema5'] > lr['ema10'] if pd.notna(lr['ema5']) and pd.notna(lr['ema10']) else False
+            ema_data[tf_name] = {
+                'ema5': round(float(lr['ema5']), 3),
+                'ema10': round(float(lr['ema10']), 3),
+                'alignment': 'bull' if bull else 'bear',
+            }
+
+        levels = []
+        if direction == 'SHORT':
+            for name, v in [('4h_EMA5', last4['ema5']), ('4h_EMA10', last4['ema10'])]:
+                if pd.notna(v):
+                    levels.append({'level': round(float(v), 3), 'name': name, 'type': 'resistance' if v > price else 'broken'})
+            for fib in FIB_LEVELS:
+                lvl = lo + (hi - lo) * fib
+                levels.append({'level': round(lvl, 3), 'name': f'Fib_{fib:.1%}', 'type': 'resistance' if lvl > price else 'broken'})
+        else:
+            for name, v in [('4h_EMA5', last4['ema5']), ('4h_EMA10', last4['ema10'])]:
+                if pd.notna(v):
+                    levels.append({'level': round(float(v), 3), 'name': name, 'type': 'support' if v < price else 'broken'})
+            for fib in FIB_LEVELS:
+                lvl = hi - (hi - lo) * fib
+                levels.append({'level': round(lvl, 3), 'name': f'Fib_{fib:.1%}', 'type': 'support' if lvl < price else 'broken'})
+
+        rationale = []
+        for tf_name, df in [('1h', h1), ('4h', h4)]:
+            e5 = df['ema5'].iloc[-1]
+            e10 = df['ema10'].iloc[-1]
+            is_bull = e5 > e10
+            arrow = '>' if is_bull else '<'
+            label = '多头' if is_bull else '空头'
+            rationale.append(f'{tf_name} EMA{label}排列(EMA5={e5:.3f}{arrow}EMA10={e10:.3f})')
+
+        adx_v = last4['adx']
+        di_p = last4['plus_di']
+        di_m = last4['minus_di']
+        trend_word = '强趋势' if adx_v > 25 else '弱趋势'
+        rationale.append(f'4h ADX={adx_v:.0f} {trend_word} +DI={di_p:.0f} -DI={di_m:.0f}')
+
+        return {
+            'price': round(float(price), 3),
+            'timeframes': ema_data,
+            '4h': {
+                'adx': round(float(adx_v), 1),
+                'plus_di': round(float(di_p), 1),
+                'minus_di': round(float(di_m), 1),
+                'atr': round(float(last4['atr']), 3),
+                'atr_pct': round(float(last4['atr'] / price * 100), 2),
+            },
+            'recent_range': {
+                'high': round(float(hi), 3),
+                'low': round(float(lo), 3),
+                'range_pct': round(float((hi - lo) / lo * 100), 2),
+            },
+            'key_levels': levels,
+            'direction_rationale': {'reasons': rationale, 'conclusion': direction},
+        }
+
+class Executor:
+    def __init__(self, exchange):
+        self.ex = exchange
+        self._pending_plan = None
+
+    def has_position(self, direction):
+        for p in self.ex.fetch_positions([SYMBOL]):
+            if float(p.get('contracts', 0)) > 0:
+                if p.get('info', {}).get('positionSide', '').upper() == direction:
+                    return True
+        return False
+
+    def get_any_position(self):
+        for p in self.ex.fetch_positions([SYMBOL]):
+            if float(p.get('contracts', 0)) > 0:
+                return p
+        return None
+
+    def cancel_all_sl_tp(self):
+        try:
+            import requests as rq, hmac as hm, hashlib as hl, urllib.parse as up
+            BASE = 'https://fapi.binance.com'
+
+            def signed(params):
+                params['timestamp'] = int(time.time() * 1000)
+                q = up.urlencode(params)
+                params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
+                return params
+
+            p = signed({'symbol': 'HYPEUSDT'})
+            hd = {'X-MBX-APIKEY': API_KEY}
+            for o in rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json():
+                p2 = signed({'symbol': 'HYPEUSDT', 'algoId': o['algoId']})
+                rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p2)}', headers=hd)
+                log(f'撤条件单: {o["algoId"]}')
+        except Exception as e:
+            log(f'撤条件单异常: {e}')
+
+    def close_position(self, position_side):
+        try:
+            pos = self.get_any_position()
+            if not pos:
+                return
+            info = pos.get('info', {})
+            amt = abs(float(info.get('positionAmt', 0)))
+            if amt <= 0:
+                return
+            side = 'BUY' if position_side == 'SHORT' else 'SELL'
+            self.ex.create_order(SYMBOL, 'market', side.lower(), amt, None, params={'positionSide': position_side})
+            log(f'平仓: {position_side} {amt} HYPE')
+            cr = {
+                'action': 'CLOSE',
+                'symbol': 'HYPE/USDT',
+                'direction': position_side,
+                'qty': amt,
+                'entry_price': round(float(pos['entryPrice']), 3),
+                'close_reason': 'signal_reversal',
+                'upnl': round(float(pos.get('unrealizedPnl', 0)), 4),
+            }
+            log_trade(cr)
+        except Exception as e:
+            log(f'平仓异常: {e}')
+
+    def open_position(self, plan):
+        d = plan['direction']
+        side = 'sell' if d == 'SHORT' else 'buy'
+        entry = plan['entry']
+        sl = plan['sl']
+        tp = plan['tp']
+        qty = POSITION_SIZE
+
+        log(f'开{d}: 限价 {entry:.3f} SL={sl:.3f} TP={tp:.3f} qty={qty}')
+
+        trade_record = {
+            'action': 'OPEN',
+            'symbol': 'HYPE/USDT',
+            'direction': d,
+            'qty': qty,
+            'leverage': LEVERAGE,
+            'entry_price': round(entry, 3),
+            'entry_type': plan.get('entry_name', ''),
+            'sl': round(sl, 3),
+            'sl_pct': round(abs(sl - entry) / entry * 100, 2),
+            'tp': round(tp, 3),
+            'tp_pct': round(abs(entry - tp) / entry * 100, 2),
+            'analysis': plan.get('analysis', {}),
+        }
+        log_trade(trade_record)
+
+        try:
+            self.ex.set_leverage(LEVERAGE, SYMBOL)
+            order = self.ex.create_order(SYMBOL, 'limit', side, qty, entry, params={'positionSide': d})
+            log(f'限价单: {order["id"]} {side} {qty} @ {entry:.3f}')
+            self._pending_plan = {
+                'order_id': order['id'],
+                'direction': d,
+                'sl': sl,
+                'tp': tp,
+                'qty': qty,
+            }
+        except Exception as e:
+            log(f'开仓异常: {e}')
+
+    def ensure_sl_tp(self):
+        if not self._pending_plan:
+            return
+        plan = self._pending_plan
+        try:
+            order = self.ex.fetch_order(plan['order_id'], SYMBOL)
+            if order['status'] != 'closed':
+                return
+            d = plan['direction']
+            sl_p = round(plan['sl'], 1)
+            tp_p = round(plan['tp'], 1)
+            qty = plan['qty']
+            cs = 'buy' if d == 'SHORT' else 'sell'
+            log(f'成交! 挂SL/TP: {d} SL={sl_p:.3f} TP={tp_p:.3f}')
+            self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
+            self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
+            log('SL/TP 已挂载')
+            self._pending_plan = None
+        except Exception as e:
+            log(f'SL/TP异常: {e}')
+
+    def ensure_naked_sl_tp(self):
+        try:
+            import requests as rq, hmac as hm, hashlib as hl, urllib.parse as up
+            BASE = 'https://fapi.binance.com'
+
+            def signed(params):
+                params['timestamp'] = int(time.time() * 1000)
+                q = up.urlencode(params)
+                params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
+                return params
+
+            p = signed({'symbol': 'HYPEUSDT'})
+            hd = {'X-MBX-APIKEY': API_KEY}
+            active_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json()
+
+            for pos in self.ex.fetch_positions([SYMBOL]):
+                info = pos.get('info', {})
+                amt = float(info.get('positionAmt', 0))
+                if amt == 0:
+                    continue
+                d = info.get('positionSide', '')
+                qty = abs(amt)
+                ep = float(pos['entryPrice'])
+
+                if d == 'SHORT':
+                    has_sl = any(float(o.get('triggerPrice', 0)) > ep and abs(float(o.get('quantity', 0)) - qty) < 0.01 for o in active_algos)
+                    has_tp = any(float(o.get('triggerPrice', 0)) < ep and abs(float(o.get('quantity', 0)) - qty) < 0.01 for o in active_algos)
+                else:
+                    has_sl = any(float(o.get('triggerPrice', 0)) < ep and abs(float(o.get('quantity', 0)) - qty) < 0.01 for o in active_algos)
+                    has_tp = any(float(o.get('triggerPrice', 0)) > ep and abs(float(o.get('quantity', 0)) - qty) < 0.01 for o in active_algos)
+
+                if has_sl and has_tp:
+                    continue
+
+                log(f'裸仓: {d} {qty}HYPE 补SL/TP...')
+
+                raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
+                df = pd.DataFrame(raw, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
+                tr = pd.concat([df['h'] - df['l'], abs(df['h'] - df['c'].shift(1)), abs(df['l'] - df['c'].shift(1))], axis=1).max(axis=1)
+                atr = tr.rolling(14).mean().iloc[-1]
+                r30 = df.tail(30)
+                lo = r30['l'].min()
+                hi = r30['h'].max()
+
+                if d == 'SHORT':
+                    sl_p = round(ep + SL_ATR_MULT * atr, 1)
+                    tp_p = round(lo, 1)
+                else:
+                    sl_p = round(ep - SL_ATR_MULT * atr, 1)
+                    tp_p = round(hi, 1)
+
+                cs = 'buy' if d == 'SHORT' else 'sell'
+                self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
+                self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
+                log(f'裸仓已保护: SL={sl_p:.3f} TP={tp_p:.3f}')
+        except Exception as e:
+            log(f'裸仓异常: {e}')
+
+def load_state():
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE) as f:
+            return json.load(f)
+    return {}
+
+def save_state(s):
+    with open(STATE_FILE, 'w') as f:
+        json.dump(s, f, indent=2, default=str)
+
+def main():
+    log('══════ HYPE自动交易 启动 (币安 10x) ══════')
+    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} HYPE  轮询: {POLL_SECONDS}s')
+
+    exchange = ccxt.binance({
+        'apiKey': API_KEY,
+        'secret': API_SECRET,
+        'options': {'defaultType': 'future'},
+    })
+    exchange.load_markets()
+
+    analyzer = Analyzer(exchange)
+    executor = Executor(exchange)
+    state = load_state()
+
+    while True:
+        try:
+            t0 = time.time()
+            analyzer.fetch()
+            direction = analyzer.direction()
+            plan = analyzer.plan()
+            price = analyzer.price
+            h4 = analyzer.data['4h'].iloc[-1]
+
+            log(f'── 价格:{price:.3f} 方向:{direction or "观望"} ADX:{h4["adx"]:.0f} +DI:{h4["plus_di"]:.0f} -DI:{h4["minus_di"]:.0f}')
+
+            executor.ensure_sl_tp()
+            executor.ensure_naked_sl_tp()
+
+            pos = executor.get_any_position()
+            if pos and direction:
+                ps = pos.get('info', {}).get('positionSide', '')
+                if ps.upper() != direction:
+                    log(f'方向反转: {ps}->{direction}')
+                    executor.cancel_all_sl_tp()
+                    executor.close_position(ps.upper())
+
+            if direction and not executor.has_position(direction) and plan:
+                executor.cancel_all_sl_tp()
+                executor.open_position(plan)
+                state['last_signal'] = direction
+                save_state(state)
+
+            elapsed = time.time() - t0
+            time.sleep(max(1, POLL_SECONDS - elapsed))
+
+        except KeyboardInterrupt:
+            log('退出')
+            break
+        except Exception as e:
+            log(f'异常: {e}')
+            traceback.print_exc()
+            time.sleep(30)
+
+if __name__ == '__main__':
+    main()
