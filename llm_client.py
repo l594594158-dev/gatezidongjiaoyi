@@ -15,6 +15,8 @@ SYSTEM_PROMPT = """你是一个资深交易员，帮我在交易信号触发时�
 你不需要逐项打勾，你要像一个交易员一样扫一眼，如果有让你直觉不安的地方就指出来，没有就放行。
 
 ## 你要关注的风险（想到了就提，没看到就不用逐条念）
+- **高位追多风险**: 如果24h已经涨了10%+，还做多，要考虑是不是在追顶。看K线是"放量实体推升"还是"缩量冲高"。前者趋势健康、后者要砸
+- **低位追空风险**: 同理，24h跌了10%+还做空，要考虑是不是踩底
 - K线是否像拉高砸盘或假突破（长上影+大成交量）
 - 主力是否在反向操作（OI增但价格反向走）
 - 费率是否极端（>0.1%才算）
@@ -54,11 +56,15 @@ def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
         })
         sym = f'{coin}/USDT:USDT'
         coin_t = ex.fetch_ticker(sym)
-        coin_change = f"{coin}24h涨跌: {coin_t.get('percentage',0):+.1f}%"
+        coin_pct = coin_t.get('percentage',0)
+        coin_high = coin_t.get('high',0)
+        coin_low = coin_t.get('low',0)
+        coin_change_line = f'{coin}24h: {coin_pct:+.1f}%  区间: ${coin_low:.4f}-${coin_high:.4f}'
         btc_t = ex.fetch_ticker('BTC/USDT:USDT')
-        btc_line = f"BTC24h涨跌: {btc_t.get('percentage',0):+.1f}%  → {coin_change} → 自己判断同向/背离/独立"
+        btc_line = f"BTC24h涨跌: {btc_t.get('percentage',0):+.1f}%  → 对比{coin}{coin_pct:+.1f}% → 自己判断同向/背离/独立"
     except:
         btc_line = 'BTC数据获取失败'
+        coin_change_line = ''
 
     price = indicators.get('price', 0)
     atr = indicators.get('atr', 0)
@@ -70,6 +76,7 @@ def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
 品种: {coin}  方向: {direction}  价格: ${price}
 入场: ${entry}  止损: ${sl}  止盈: ${tp}
 仓位: {qty} × {leverage}x  入场价差: {diff_atr:.1f}×ATR ({diff/price*100:.1f}%)
+{coin_change_line}
 
 ## 指标数据
 {indicators.get('raw','')}
