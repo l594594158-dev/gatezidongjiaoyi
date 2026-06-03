@@ -587,6 +587,14 @@ def main():
             executor.ensure_sl_tp()
             executor.ensure_naked_sl_tp()
 
+            # 方向消失 → 撤所有限价单
+            if not direction:
+                open_orders = executor.ex.fetch_open_orders(SYMBOL)
+                for o in open_orders:
+                    if o.get('type', '') not in ('STOP_MARKET', 'TAKE_PROFIT_MARKET'):
+                        executor.ex.cancel_order(o['id'], SYMBOL)
+                        log(f'方向消失 → 撤限价单: {o["id"]}')
+
             pos = executor.get_any_position()
             if pos and direction:
                 ps = pos.get('info', {}).get('positionSide', '')
