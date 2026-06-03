@@ -201,10 +201,12 @@ class Analyzer:
         vol_ma20 = h4['vol'].rolling(20).mean().iloc[-1]
         vol_ok = h4_prev['vol'] > 0.8 * vol_ma20
 
-        rsi_val = h4['close'].diff()
-        gain = rsi_val.clip(lower=0).rolling(14).mean().iloc[-1]
-        loss = (-rsi_val.clip(upper=0)).rolling(14).mean().iloc[-1]
-        rsi = 100 - 100 / (1 + gain / loss) if loss > 0 else 100
+        # 用1h闭K RSI，比4h灵敏4倍
+        h1_rsi = h1['close'].diff()
+        h1_gain = h1_rsi.clip(lower=0).rolling(14).mean().iloc[-1]
+        h1_loss = (-h1_rsi.clip(upper=0)).rolling(14).mean().iloc[-1]
+        # RSI用当前未收盘K线(iloc[-1])，因为只是安全阀不是信号，不需要等闭K
+        rsi = 100 - 100 / (1 + h1_gain / h1_loss) if h1_loss > 0 else 100
         rsi_ok = 25 < rsi < 75
 
         candle_range = h4_prev['high'] - h4_prev['low']
@@ -216,7 +218,7 @@ class Analyzer:
             log(f'  信号过滤: 缩量(vol={h4_row["vol"]:.0f} < 0.8xMA20={vol_ma20:.0f}) → 观望')
             return None
         if not rsi_ok:
-            log(f'  信号过滤: RSI极值(RSI={rsi:.0f}) → 观望')
+            log(f'  信号过滤: RSI极值(1h RSI={rsi:.0f}) → 观望')
             return None
         if not candle_ok:
             log(f'  信号过滤: K线不够坚定(body={candle_body:.4f}/range={candle_range:.4f}={candle_body/candle_range*100:.0f}%) → 观望')
