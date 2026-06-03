@@ -675,34 +675,42 @@ def main():
                         state['last_signal'] = direction
                         save_state(state)
                 else:
-                    # LLM二次确认流程
+                    # LLM二次确认: 直接调DeepSeek API
                     try:
-                        from llm_review import submit_signal, check_response
-                        resp = check_response('BTC')
-                        if resp:
-                            if resp['decision'] == 'CONFIRMED':
-                                log(f'LLM确认: {resp["reason"][:80]}')
-                                executor.open_position(plan)
-                                state['last_signal'] = direction
-                                save_state(state)
-                                # 清理确认文件
-                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'BTC_response.json'))
-                            else:
-                                log(f'LLM否决: {resp["reason"][:80]}')
-                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'BTC_response.json'))
+                        from llm_client import analyze as llm_analyze
+                        from llm_review import _write_trade_log
+                        import json as _json
+                
+                        enrich = {}
+                        epath = os.path.join(SCRIPT_DIR, 'market_enrich.json')
+                        if os.path.exists(epath):
+                            with open(epath) as _f:
+                                edata = _json.load(_f)
+                                enrich = edata.get('coins', {}).get('BTC', {})
+                
+                        indicators = {'price': price, 'atr': float(h4.get('atr',0)),
+                                       'atr_pct': float(h4.get('atr_pct',0)),
+                                       'raw': str(rationale)[:800]}
+                
+                        decision, reason = llm_analyze(
+                            'BTC', direction, plan['entry'], plan['sl'],
+                            plan['tp'], POSITION_SIZE, LEVERAGE, indicators, enrich
+                        )
+                
+                        if decision == 'CONFIRMED':
+                            log(f'LLM确认: {reason[:60]}')
+                            _write_trade_log('BTC', 'CONFIRMED', reason)
+                            executor.open_position(plan)
+                            state['last_signal'] = direction
+                            save_state(state)
                         else:
-                            # 提交信号等待审核
-                            ana = rationale.get('details', '')
-                            submit_signal('BTC', direction, plan['entry'], plan['sl'],
-                                        plan['tp'], POSITION_SIZE, LEVERAGE, str(ana)[:500])
-                            log('→ LLM审核中: 信号已提交，等待二次确认')
+                            log(f'LLM否决: {reason[:60]}')
+                            _write_trade_log('BTC', 'REJECTED', reason)
                     except Exception as e:
-                        log(f'LLM审核异常({e})，跳过审核直接开仓')
+                        log(f'LLM异常({e})，降级直接开仓')
                         executor.open_position(plan)
                         state['last_signal'] = direction
                         save_state(state)
-
-            # 5. 等待——拆成30s小段，快速检测限价单成交
             elapsed = time.time() - t0
             remaining = POLL_SECONDS - elapsed
             while remaining > 0:

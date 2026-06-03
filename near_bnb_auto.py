@@ -601,26 +601,39 @@ def main():
                         state['last_signal'] = direction
                         save_state(state)
                 else:
-                    # LLM二次确认
+                    # LLM二次确认: 直接调DeepSeek API
                     try:
-                        from llm_review import submit_signal, check_response
-                        resp = check_response('NEAR')
-                        if resp:
-                            if resp['decision'] == 'CONFIRMED':
-                                log(f'LLM确认: {resp["reason"][:80]}')
-                                executor.open_position(plan)
-                                state['last_signal'] = direction
-                                save_state(state)
-                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'NEAR_response.json'))
-                            else:
-                                log(f'LLM否决: {resp["reason"][:80]}')
-                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'NEAR_response.json'))
+                        from llm_client import analyze as llm_analyze
+                        from llm_review import _write_trade_log
+                        import json as _json
+                
+                        enrich = {}
+                        epath = os.path.join(SCRIPT_DIR, 'market_enrich.json')
+                        if os.path.exists(epath):
+                            with open(epath) as _f:
+                                edata = _json.load(_f)
+                                enrich = edata.get('coins', {}).get('NEAR', {})
+                
+                        indicators = {'price': price, 'atr': h4.get('atr',0),
+                                       'atr_pct': h4.get('atr_pct',0),
+                                       'raw': str(rationale)[:800]}
+                
+                        decision, reason = llm_analyze(
+                            'NEAR', direction, plan['entry'], plan['sl'],
+                            plan['tp'], POSITION_SIZE, LEVERAGE, indicators, enrich
+                        )
+                
+                        if decision == 'CONFIRMED':
+                            log(f'LLM确认: {reason[:60]}')
+                            _write_trade_log('NEAR', 'CONFIRMED', reason)
+                            executor.open_position(plan)
+                            state['last_signal'] = direction
+                            save_state(state)
                         else:
-                            submit_signal('NEAR', direction, plan['entry'], plan['sl'],
-                                        plan['tp'], POSITION_SIZE, LEVERAGE, str(rationale)[:500])
-                            log('\u2192 LLM审核中: 信号已提交，等待二次确认')
+                            log(f'LLM否决: {reason[:60]}')
+                            _write_trade_log('NEAR', 'REJECTED', reason)
                     except Exception as e:
-                        log(f'LLM审核异常({e})，跳过审核直接开仓')
+                        log(f'LLM异常({e})，降级直接开仓')
                         executor.open_position(plan)
                         state['last_signal'] = direction
                         save_state(state)
