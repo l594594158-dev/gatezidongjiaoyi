@@ -46,6 +46,11 @@ def log_trade(entry):
             f'止损: {entry.get("sl")} USDT (-{entry.get("sl_pct")}%)',
             f'止盈: {entry.get("tp")} USDT (+{entry.get("tp_pct")}%)',
         ]
+    elif action == 'FILLED':
+        lines += [
+            f'操作: 挂单成交{d_cn}',
+            f'数量: {entry.get("qty")} 成交价: {entry.get("entry_price")} USDT',
+        ]
     elif action == 'CANCEL':
         cancel_id = entry.get('order_id', '')
         lines += [
@@ -418,6 +423,18 @@ class Executor:
             qty = plan['qty']
             cs = 'buy' if d == 'SHORT' else 'sell'
             log(f'成交! 挂SL/TP: {d} SL={sl_p:.3f} TP={tp_p:.3f}')
+            d_cn = '做空' if d == 'SHORT' else '做多'
+            fill_ts = None
+            if order.get('lastTradeTimestamp'):
+                from datetime import datetime as dt2
+                fill_ts = dt2.fromtimestamp(order['lastTradeTimestamp']/1000).strftime('%Y-%m-%d %H:%M:%S')
+            elif order.get('datetime'):
+                fill_ts = order['datetime'][:19].replace('T', ' ')
+            log_trade({
+                'action': 'FILLED', 'direction': d, 'qty': qty,
+                'entry_price': round(float(order.get('price', plan.get('entry_price', 0))), 3) if order.get('price') else round(plan.get('entry_price', 0), 3),
+                '_timestamp': fill_ts,
+            })
             self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
             self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
             log('SL/TP 已挂载')
