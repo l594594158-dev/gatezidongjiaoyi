@@ -665,10 +665,14 @@ def main():
                     state['last_signal'] = direction
                     save_state(state)
 
-            # 5. 等待
+            # 5. 等待——拆成30s小段，快速检测限价单成交
             elapsed = time.time() - t0
-            wait = max(1, POLL_SECONDS - elapsed)
-            time.sleep(wait)
+            remaining = POLL_SECONDS - elapsed
+            while remaining > 0:
+                chunk = min(30, remaining)
+                time.sleep(chunk)
+                executor.ensure_sl_tp()
+                remaining -= chunk
 
         except KeyboardInterrupt:
             log('退出')
