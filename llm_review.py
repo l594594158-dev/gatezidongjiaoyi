@@ -59,13 +59,51 @@ def check_response(coin):
     return resp
 
 
+def _trade_log_path(coin):
+    """根据币名返回交易日志路径"""
+    # bnb_auto.py 使用 bnb_bn_trades.txt
+    coin_lower = coin.lower()
+    base = os.path.dirname(SIGNAL_DIR)
+    return os.path.join(base, f'{coin_lower}_bn_trades.txt')
+
+
+def _write_trade_log(coin, decision, reason, signal_data=None):
+    """将LLM分析写入交易日志"""
+    from datetime import datetime
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    label = 'LLM确认开仓' if decision == 'CONFIRMED' else 'LLM否决开仓'
+
+    lines = [
+        '═══════════════════════════════════',
+        f'时间: {now}',
+        f'操作: {label}',
+        f'品种: {coin}',
+    ]
+
+    if signal_data:
+        lines.append(f'方向: {signal_data.get("direction","?")}')
+        lines.append(f'入场: {signal_data.get("entry_price","?")}  止损: {signal_data.get("stop_loss","?")}  止盈: {signal_data.get("take_profit","?")}')
+        lines.append(f'仓位: {signal_data.get("qty","?")} × {signal_data.get("leverage","?")}x')
+
+    lines.append(f'── LLM分析 ──')
+    for line in reason.split('\n'):
+        lines.append(f'  {line.strip()}')
+    lines.append('═══════════════════════════════════')
+
+    log_path = _trade_log_path(coin)
+    with open(log_path, 'a') as f:
+        f.write('\n'.join(lines) + '\n')
+
+
 def llm_confirm(coin, reason=''):
-    """LLM调用: 确认交易"""
+    """LLM调用: 确认交易 → 写入response + 交易日志"""
     sig_file = os.path.join(SIGNAL_DIR, f'{coin}_signal.json')
+    sig_data = {}
     ts = 0
     if os.path.exists(sig_file):
         with open(sig_file) as f:
-            ts = json.load(f).get('timestamp', 0)
+            sig_data = json.load(f)
+            ts = sig_data.get('timestamp', 0)
 
     resp = {
         'decision': 'CONFIRMED',
@@ -75,16 +113,20 @@ def llm_confirm(coin, reason=''):
     }
     with open(os.path.join(SIGNAL_DIR, f'{coin}_response.json'), 'w') as f:
         json.dump(resp, f, indent=2, ensure_ascii=False)
+
+    _write_trade_log(coin, 'CONFIRMED', reason, sig_data)
     return resp
 
 
 def llm_reject(coin, reason=''):
-    """LLM调用: 否决交易"""
+    """LLM调用: 否决交易 → 写入response + 交易日志"""
     sig_file = os.path.join(SIGNAL_DIR, f'{coin}_signal.json')
+    sig_data = {}
     ts = 0
     if os.path.exists(sig_file):
         with open(sig_file) as f:
-            ts = json.load(f).get('timestamp', 0)
+            sig_data = json.load(f)
+            ts = sig_data.get('timestamp', 0)
 
     resp = {
         'decision': 'REJECTED',
@@ -94,6 +136,8 @@ def llm_reject(coin, reason=''):
     }
     with open(os.path.join(SIGNAL_DIR, f'{coin}_response.json'), 'w') as f:
         json.dump(resp, f, indent=2, ensure_ascii=False)
+
+    _write_trade_log(coin, 'REJECTED', reason, sig_data)
     return resp
 
 
