@@ -576,7 +576,7 @@ class Executor:
                     has_sl = any(float(o.get('triggerPrice',0))<ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
                     has_tp = any(float(o.get('triggerPrice',0))>ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
                 if has_sl and has_tp: continue
-                d_cn = '做空' if d == 'SHORT' else '做多'
+                # 裸仓：补FILLED日志 + 挂SL/TP
                 log_trade({
                     'action': 'FILLED', 'direction': d, 'qty': qty,
                     'entry_price': round(ep, 3),
@@ -633,7 +633,10 @@ def main():
     try:
         pos_check = executor.get_any_position()
         if pos_check:
-            executor.cancel_all_orders()
+            # 只撤限价单，不碰SL/TP(否则ensure_naked会重复写FILLED)
+            for o in executor.ex.fetch_open_orders(SYMBOL):
+                if o.get('type', '') not in ('STOP_MARKET', 'TAKE_PROFIT_MARKET', 'LIMIT_STOP_MARKET', 'LIMIT_TAKE_PROFIT_MARKET'):
+                    executor.ex.cancel_order(o['id'], SYMBOL)
             log('启动清理: 撤残留限价单')
         executor.ensure_naked_sl_tp()
     except Exception as e:

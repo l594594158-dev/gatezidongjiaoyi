@@ -549,7 +549,10 @@ def main():
     try:
         pos_check = executor.get_any_position()
         if pos_check:
-            executor.cancel_all_orders()
+            # 只撤限价单，不碰SL/TP(否则ensure_naked会重复写FILLED)
+            for o in executor.ex.fetch_open_orders(SYMBOL):
+                if o.get('type', '') not in ('STOP_MARKET', 'TAKE_PROFIT_MARKET', 'LIMIT_STOP_MARKET', 'LIMIT_TAKE_PROFIT_MARKET'):
+                    executor.ex.cancel_order(o['id'], SYMBOL)
             log('启动清理: 撤残留限价单')
         executor.ensure_naked_sl_tp()
     except Exception as e:
