@@ -650,13 +650,13 @@ def main():
                 
                         if decision == 'CONFIRMED':
                             log(f'LLM确认: {reason[:60]}')
-                            _write_trade_log('WLD', 'CONFIRMED', reason)
+                            _write_trade_log('WLD', 'CONFIRMED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
                             executor.open_position(plan)
                             state['last_signal'] = direction
                             save_state(state)
                         else:
                             log(f'LLM否决: {reason[:60]}')
-                            _write_trade_log('WLD', 'REJECTED', reason)
+                            _write_trade_log('WLD', 'REJECTED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
                     except Exception as e:
                         log(f'LLM异常({e})，降级直接开仓')
                         executor.open_position(plan)
