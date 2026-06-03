@@ -40,3 +40,10 @@
 [WD][21:53:05] SUIUSDT: 孤儿? 3000001729641645 已清理（无对应持仓）
 [WD][21:53:05] 本轮清理 8 个孤儿条件单
 [WD][21:53:05] 本轮清理 8 个孤儿条件单
+Traceback (most recent call last):
+  File "/root/zidongjiaoyi/watchdog.py", line 85, in <module>
+    main()
+  File "/root/zidongjiaoyi/watchdog.py", line 64, in main
+    oid = a['algoId']
+          ~^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
