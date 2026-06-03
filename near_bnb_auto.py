@@ -535,6 +535,20 @@ class Executor:
                 self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
                 self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
                 log(f'裸仓已保护: SL={sl_p:.3f} TP={tp_p:.3f}')
+                # 反查: 有条件单但无对应持仓 → 清理孤儿
+                for a in active_algos:
+                    a_qty = float(a.get('quantity', 0))
+                    has_match = False
+                    for pos2 in self.ex.fetch_positions([SYMBOL]):
+                        if abs(abs(float(pos2.get('info',{}).get('positionAmt',0)))-a_qty) < 0.01:
+                            has_match = True
+                            break
+                    if not has_match:
+                        try:
+                            p3 = signed({'symbol': raw_symbol, 'algoId': a['algoId']})
+                            rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p3)}', headers=hd)
+                            log(f'孤儿清理: {a["algoId"]}')
+                        except: pass
         except Exception as e:
             log(f'裸仓异常: {e}')
 
