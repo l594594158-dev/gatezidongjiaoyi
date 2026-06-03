@@ -1,0 +1,77 @@
+{
+  "updated": "2026-06-03 10:33:11 UTC",
+  "coins": {
+    "BTC": {
+      "funding_rate": 0.0036,
+      "funding_next": 1780502400000,
+      "oi_contracts": 107791.401,
+      "oi_value": 7255999716.5952,
+      "ls_position_ratio": 1.5877,
+      "ls_account_ratio": 2.2331
+    },
+    "HYPE": {
+      "funding_rate": 0.005,
+      "funding_next": 1780488000000,
+      "oi_contracts": 6695751.0,
+      "oi_value": 487095797.997,
+      "ls_position_ratio": 1.139,
+      "ls_account_ratio": 0.6745
+    },
+    "ZEC": {
+      "funding_rate": 0.0007,
+      "funding_next": 1780502400000,
+      "oi_contracts": 611675.843,
+      "oi_value": 369158604.76736,
+      "ls_position_ratio": 0.7848,
+      "ls_account_ratio": 0.5818
+    },
+    "NEAR": {
+      "funding_rate": -0.0036,
+      "funding_next": 1780502400000,
+      "oi_contracts": 48748102.0,
+      "oi_value": 140540778.066,
+      "ls_position_ratio": 1.9437,
+      "ls_account_ratio": 1.3889
+    },
+    "XLM": {
+      "funding_rate": -0.004,
+      "funding_next": 1780502400000,
+      "oi_contracts": 307396558.0,
+      "oi_value": 69394772.9685,
+      "ls_position_ratio": 1.0851,
+      "ls_account_ratio": 0.9798
+    },
+    "WLD": {
+      "funding_rate": 0.01,
+      "funding_next": 1780502400000,
+      "oi_contracts": 239190428.0,
+      "oi_value": 120862923.2684,
+      "ls_position_ratio": 1.3884,
+      "ls_account_ratio": 1.6688
+    },
+    "ENA": {
+      "funding_rate": 0.005,
+      "funding_next": 1780488000000,
+      "oi_contracts": 599101134.0,
+      "oi_value": 63690441.55554,
+      "ls_position_ratio": 2.2466,
+      "ls_account_ratio": 1.7816
+    },
+    "SUI": {
+      "funding_rate": -0.0048,
+      "funding_next": 1780502400000,
+      "oi_contracts": 110839983.2,
+      "oi_value": 92728729.94512,
+      "ls_position_ratio": 2.048,
+      "ls_account_ratio": 2.2175
+    },
+    "BNB": {
+      "funding_rate": 0.0015,
+      "funding_next": 1780502400000,
+      "oi_contracts": 630383.27,
+      "oi_value": 405739887.9028,
+      "ls_position_ratio": 1.3704,
+      "ls_account_ratio": 2.7202
+    }
+  }
+}
