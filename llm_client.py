@@ -26,15 +26,15 @@ SYSTEM_PROMPT = """你是一个资深交易员，帮我在交易信号触发时�
 - 不要把"持仓多空比略有分歧"当成否决理由
 
 ## 输出格式
-CONFIRMED|{用你自己的话简短说一下为什么没问题，像交易员聊天}
+先写你的判断过程（想到什么说什么，不用列点），最后一行输出:
+CONFIRMED|{简短结论}
 或
-REJECTED|{用你自己的话指出核心风险，不要列清单}
+REJECTED|{核心风险}
 
-好的例子:
-CONFIRMED|趋势明确，K线实体扎实，能吃到的价位，没问题
-CONFIRMED|和大盘各走各的，费率也正常，多进去
-REJECTED|这根上影太长了配合巨量，典型的拉高出货，不做
-REJECTED|费率0.15%多杀多风险太高，等回落再说"""
+像这样的:
+这币和大盘完全走反了，说明有自己的资金在推。K线实体一根比一根扎实，不是那种拉一根针就砸的。入场价也就差一点点，一个4h波动就能吃到。费率没毛病。
+CONFIRMED|独立走势，K线扎实，可以进
+"""
 
 
 def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
@@ -106,6 +106,11 @@ OI价值: ${enrich.get('oi_value',0)/1e6:.1f}M
             return ('REJECTED', f'API错误{resp.status_code}')
 
         content = resp.json()['choices'][0]['message']['content'].strip()
+
+        # 写入原始思考（完整LLM回复）
+        _raw_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llm_raw_think.log')
+        with open(_raw_path, 'a') as _rf:
+            _rf.write(f'\n══════ {coin} {direction} ══════\n{content}\n')
 
         # 解析 CONFIRMED|reason 或 REJECTED|reason
         for prefix in ['CONFIRMED', 'REJECTED']:
