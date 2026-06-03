@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-ZEC 全自动交易机器人 - Binance 版
+NEAR 全自动交易机器人 - Binance 版
 框架与BTC完全一致：三周期EMA+ADX+DI判方向，4h EMA/Fib共振入场，ATR自适应止损。
-参数：10x杠杆，3 ZEC/笔。
+参数：10x杠杆，3 NEAR/笔。
 """
 import ccxt, pandas as pd, numpy as np, time, json, os, traceback
 from datetime import datetime
 
-SYMBOL = 'ZEC/USDT:USDT'
+SYMBOL = 'NEAR/USDT:USDT'
 LEVERAGE = 10
-POSITION_SIZE = 0.5
+POSITION_SIZE = 100.0
 TIMEFRAMES = ['1h', '4h', '1d']
 SL_ATR_MULT = 1.5
 FIB_LEVELS = [0.236, 0.382]
@@ -18,9 +18,9 @@ DI_RATIO = 1.5
 POLL_SECONDS = 300
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-STATE_FILE = os.path.join(SCRIPT_DIR, 'zec_bn_state.json')
-LOG_FILE = os.path.join(SCRIPT_DIR, 'zec_bn.log')
-TRADE_LOG = os.path.join(SCRIPT_DIR, 'zec_bn_trades.txt')
+STATE_FILE = os.path.join(SCRIPT_DIR, 'near_bn_state.json')
+LOG_FILE = os.path.join(SCRIPT_DIR, 'near_bn.log')
+TRADE_LOG = os.path.join(SCRIPT_DIR, 'near_bn_trades.txt')
 
 API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
 API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
@@ -41,7 +41,7 @@ def log_trade(entry):
     if action == 'OPEN':
         lines += [
             f'操作: 开仓{d_cn}',
-            f'数量: {entry.get("qty")} ZEC | 杠杆: {entry.get("leverage")}x',
+            f'数量: {entry.get("qty")} NEAR | 杠杆: {entry.get("leverage")}x',
             f'入场价: {entry.get("entry_price")} USDT ({entry.get("entry_type","")})',
             f'止损: {entry.get("sl")} USDT (-{entry.get("sl_pct")}%)',
             f'止盈: {entry.get("tp")} USDT (+{entry.get("tp_pct")}%)',
@@ -62,7 +62,7 @@ def log_trade(entry):
     elif action == 'CLOSE':
         lines += [
             f'操作: 平仓{d_cn}',
-            f'数量: {entry.get("qty")} ZEC',
+            f'数量: {entry.get("qty")} NEAR',
             f'开仓价: {entry.get("entry_price")} USDT',
             f'盈亏: {entry.get("upnl")} USDT',
         ]
@@ -384,10 +384,10 @@ class Executor:
                 return
             side = 'BUY' if position_side == 'SHORT' else 'SELL'
             self.ex.create_order(SYMBOL, 'market', side.lower(), amt, None, params={'positionSide': position_side})
-            log(f'平仓: {position_side} {amt} ZEC')
+            log(f'平仓: {position_side} {amt} NEAR')
             cr = {
                 'action': 'CLOSE',
-                'symbol': 'ZEC/USDT',
+                'symbol': 'NEAR/USDT',
                 'direction': position_side,
                 'qty': amt,
                 'entry_price': round(float(pos['entryPrice']), 3),
@@ -410,7 +410,7 @@ class Executor:
 
         trade_record = {
             'action': 'OPEN',
-            'symbol': 'ZEC/USDT',
+            'symbol': 'NEAR/USDT',
             'direction': d,
             'qty': qty,
             'leverage': LEVERAGE,
@@ -483,7 +483,7 @@ class Executor:
                 params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
                 return params
 
-            p = signed({'symbol': 'ZECUSDT'})
+            p = signed({'symbol': 'NEARUSDT'})
             hd = {'X-MBX-APIKEY': API_KEY}
             active_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json()
 
@@ -506,7 +506,7 @@ class Executor:
                 if has_sl and has_tp:
                     continue
 
-                log(f'裸仓: {d} {qty}ZEC 补SL/TP...')
+                log(f'裸仓: {d} {qty}NEAR 补SL/TP...')
 
                 raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
                 df = pd.DataFrame(raw, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
@@ -541,8 +541,8 @@ def save_state(s):
         json.dump(s, f, indent=2, default=str)
 
 def main():
-    log('══════ ZEC自动交易 启动 (币安 10x) ══════')
-    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} ZEC  轮询: {POLL_SECONDS}s')
+    log('══════ NEAR自动交易 启动 (币安 10x) ══════')
+    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} NEAR  轮询: {POLL_SECONDS}s')
 
     exchange = ccxt.binance({
         'apiKey': API_KEY,

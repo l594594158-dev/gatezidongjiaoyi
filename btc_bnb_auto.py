@@ -187,11 +187,41 @@ class Analyzer:
         di_bull = (pd.notna(last4['minus_di']) and pd.notna(last4['plus_di']) and
                    last4['plus_di'] > last4['minus_di'] * DI_RATIO)
 
+        # 基础方向
+        base = None
         if ema_bear >= 2 and adx_ok and di_bear:
-            return 'SHORT'
-        if ema_bull >= 2 and adx_ok and di_bull:
-            return 'LONG'
-        return None
+            base = 'SHORT'
+        elif ema_bull >= 2 and adx_ok and di_bull:
+            base = 'LONG'
+        if base is None:
+            return None
+
+        # 信号质量过滤
+        h4_row = h4.iloc[-1]; h4_prev = h4.iloc[-2]  # 上根已收盘K线用于量/形态过滤
+        vol_ma20 = h4['vol'].rolling(20).mean().iloc[-1]
+        vol_ok = h4_prev['vol'] > 0.8 * vol_ma20
+
+        rsi_val = h4['close'].diff()
+        gain = rsi_val.clip(lower=0).rolling(14).mean().iloc[-1]
+        loss = (-rsi_val.clip(upper=0)).rolling(14).mean().iloc[-1]
+        rsi = 100 - 100 / (1 + gain / loss) if loss > 0 else 100
+        rsi_ok = 25 < rsi < 75
+
+        candle_range = h4_prev['high'] - h4_prev['low']
+        candle_body = abs(h4_prev['close'] - h4_prev['open'])
+        candle_ok = candle_range > 0 and candle_body / candle_range > 0.3
+
+        # 任一不满足 → 观望
+        if not vol_ok:
+            log(f'  信号过滤: 缩量(vol={h4_row["vol"]:.0f} < 0.8xMA20={vol_ma20:.0f}) → 观望')
+            return None
+        if not rsi_ok:
+            log(f'  信号过滤: RSI极值(RSI={rsi:.0f}) → 观望')
+            return None
+        if not candle_ok:
+            log(f'  信号过滤: K线不够坚定(body={candle_body:.4f}/range={candle_range:.4f}={candle_body/candle_range*100:.0f}%) → 观望')
+            return None
+        return base
 
     def plan(self) -> dict | None:
         d = self.direction()
