@@ -72,6 +72,14 @@ def log_trade(entry: dict):
         lines.append(f'入场价: {entry.get("entry_price", "?")} USDT ({entry.get("entry_type", "")})')
         lines.append(f'止损: {entry.get("sl", "?")} USDT (-{entry.get("sl_pct", "?")}%)')
         lines.append(f'止盈: {entry.get("tp", "?")} USDT (+{entry.get("tp_pct", "?")}%)')
+    elif action == 'CANCEL':
+        cancel_id = entry.get('order_id', '')
+        lines += [
+            f'操作: 取消挂单{d_cn}',
+            f'数量: {entry.get("qty")} 订单ID: {cancel_id}',
+            f'挂单价: {entry.get("entry_price")} USDT',
+            f'原因: {entry.get("cancel_reason", "signal_change")}',
+        ]
     elif action == 'CLOSE':
         lines.append(f'操作: 平仓{d_cn}')
         lines.append(f'数量: {qty} BTC')
@@ -347,109 +355,63 @@ class Executor:
         return None
 
     def cancel_all_sl_tp(self):
-        """取消所有BTC条件单"""
-        try:
-            import requests, hmac as hmac_lib, hashlib as hashlib_lib, urllib.parse as up
-            BASE = 'https://fapi.binance.com'
+        self.cancel_all_orders()
 
+    def cancel_all_orders(self):
+        try:
+            open_orders = self.ex.fetch_open_orders(SYMBOL)
+            for o in open_orders:
+                self.ex.cancel_order(o['id'], SYMBOL)
+                log(f'撤限价单: {o["id"]}')
+        except Exception as e:
+            log(f'撤限价单异常: {e}')
+        try:
+            import requests as rq, hmac as hm, hashlib as hl, urllib.parse as up
+            BASE = 'https://fapi.binance.com'
             def signed(params):
                 params['timestamp'] = int(time.time() * 1000)
                 q = up.urlencode(params)
-                params['signature'] = hmac_lib.new(
-                    API_SECRET.encode(), q.encode(), hashlib_lib.sha256
-                ).hexdigest()
+                params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
                 return params
-
             p = signed({'symbol': 'BTCUSDT'})
-            r = requests.get(
-                f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}',
-                headers={'X-MBX-APIKEY': API_KEY}
-            )
-            for o in r.json():
+            hd = {'X-MBX-APIKEY': API_KEY}
+            for o in rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json():
                 p2 = signed({'symbol': 'BTCUSDT', 'algoId': o['algoId']})
-                requests.delete(
-                    f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p2)}',
-                    headers={'X-MBX-APIKEY': API_KEY}
-                )
+                rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p2)}', headers=hd)
                 log(f'撤条件单: {o["algoId"]}')
         except Exception as e:
             log(f'撤条件单异常: {e}')
 
-    def ensure_naked_sl_tp(self):
-        """检查所有持仓是否已有SL/TP，裸仓自动补挂"""
+    def has_open_order(self, direction):
+        for o in self.ex.fetch_open_orders(SYMBOL):
+            ps = o.get('info', {}).get('positionSide', '').upper() if isinstance(o.get('info'), dict) else ''
+            side = 'BUY' if direction == 'LONG' else 'SELL'
+            if o['side'].upper() == side and (not ps or ps == direction):
+                return True
+        return False
+
+
+    def update_order_if_stale(self, plan):
+        """如果入场价变动超过0.3xATR，撤旧挂新"""
         try:
-            # 查现有条件单
-            import requests, hmac as hm, hashlib as hl, urllib.parse as up
-            BASE = 'https://fapi.binance.com'
-            params = {'symbol': 'BTCUSDT', 'timestamp': int(time.time() * 1000)}
-            q = up.urlencode(params)
-            params['signature'] = hm.new(
-                API_SECRET.encode(), q.encode(), hl.sha256
-            ).hexdigest()
-            r = requests.get(
-                f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(params)}',
-                headers={'X-MBX-APIKEY': API_KEY}
-            )
-            active_algos = r.json() if r.text else []
-
-            # 查持仓
-            for p in self.ex.fetch_positions([SYMBOL]):
-                info = p.get('info', {})
-                amt = float(info.get('positionAmt', 0))
-                if amt == 0:
-                    continue
-                d = info.get('positionSide', '')
-                qty = abs(amt)
-                ep = float(p['entryPrice'])
-
-                # 检查是否有对应SL和TP
-                has_sl = any(
-                    float(o.get('triggerPrice', 0)) > ep and abs(float(o.get('quantity', 0)) - qty) < 0.0001
-                    for o in active_algos
-                ) if d == 'SHORT' else any(
-                    float(o.get('triggerPrice', 0)) < ep and abs(float(o.get('quantity', 0)) - qty) < 0.0001
-                    for o in active_algos
-                )
-                has_tp = any(
-                    float(o.get('triggerPrice', 0)) < ep and abs(float(o.get('quantity', 0)) - qty) < 0.0001
-                    for o in active_algos
-                ) if d == 'SHORT' else any(
-                    float(o.get('triggerPrice', 0)) > ep and abs(float(o.get('quantity', 0)) - qty) < 0.0001
-                    for o in active_algos
-                )
-
-                if has_sl and has_tp:
-                    continue  # 已保护
-
-                log(f'裸仓检测: {d} {qty} BTC 无SL/TP，补挂中...')
-
-                # 计算SL/TP
-                raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
-                df = pd.DataFrame(raw, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
-                tr = pd.concat([
-                    df['h'] - df['l'],
-                    abs(df['h'] - df['c'].shift(1)),
-                    abs(df['l'] - df['c'].shift(1))
-                ], axis=1).max(axis=1)
-                atr = tr.rolling(14).mean().iloc[-1]
-                r30 = df.tail(30)
-                lo, hi = r30['l'].min(), r30['h'].max()
-
-                if d == 'SHORT':
-                    sl_p = round(ep + SL_ATR_MULT * atr, 1)
-                    tp_p = round(lo, 1)
-                else:
-                    sl_p = round(ep - SL_ATR_MULT * atr, 1)
-                    tp_p = round(hi, 1)
-
-                cs = 'buy' if d == 'SHORT' else 'sell'
-                self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None,
-                                     params={'stopPrice': sl_p, 'positionSide': d})
-                self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None,
-                                     params={'stopPrice': tp_p, 'positionSide': d})
-                log(f'裸仓已保护: SL={sl_p:.1f} TP={tp_p:.1f}')
+            orders = self.ex.fetch_open_orders(SYMBOL)
+            if not orders:
+                return False
+            new_entry = plan['entry']
+            atr = plan.get('atr', 0)
+            threshold = 0.3 * atr  # ATR自适应阈值
+            for o in orders:
+                old_price = float(o['price'])
+                change_pct = abs(new_entry - old_price) / old_price * 100
+                if abs(new_entry - old_price) > threshold:
+                    log(f'入场价变动: {old_price:.3f}->{new_entry:.3f} ({change_pct:.2f}% > {threshold/new_entry*100:.2f}%阈值), 撤旧挂新')
+                    self.cancel_all_orders()
+                    self.open_position(plan)
+                    return True
+            return False
         except Exception as e:
-            log(f'裸仓保护异常: {e}')
+            log(f'update_order_if_stale异常: {e}')
+            return False
 
     def close_position(self, position_side: str):
         """市价平仓"""
@@ -556,6 +518,49 @@ class Executor:
         except Exception as e:
             log(f'SL/TP异常: {e}')
 
+    def ensure_naked_sl_tp(self):
+        try:
+            import requests as rq, hmac as hm, hashlib as hl, urllib.parse as up
+            BASE = 'https://fapi.binance.com'
+            def signed(params):
+                params['timestamp'] = int(time.time() * 1000)
+                q = up.urlencode(params)
+                params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
+                return params
+            p = signed({'symbol': 'BTCUSDT'})
+            hd = {'X-MBX-APIKEY': API_KEY}
+            active_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json()
+            for pos in self.ex.fetch_positions([SYMBOL]):
+                info = pos.get('info', {})
+                amt = float(info.get('positionAmt', 0))
+                if amt == 0: continue
+                d = info.get('positionSide', '')
+                qty = abs(amt)
+                ep = float(pos['entryPrice'])
+                if d == 'SHORT':
+                    has_sl = any(float(o.get('triggerPrice',0))>ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
+                    has_tp = any(float(o.get('triggerPrice',0))<ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
+                else:
+                    has_sl = any(float(o.get('triggerPrice',0))<ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
+                    has_tp = any(float(o.get('triggerPrice',0))>ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
+                if has_sl and has_tp: continue
+                log(f'裸仓: {d} {qty}BTC 补SL/TP...')
+                raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
+                df = pd.DataFrame(raw, columns=['ts','o','h','l','c','v'])
+                tr = pd.concat([df['h']-df['l'],abs(df['h']-df['c'].shift(1)),abs(df['l']-df['c'].shift(1))],axis=1).max(axis=1)
+                atr_val = tr.rolling(14).mean().iloc[-1]
+                r30 = df.tail(30); lo=r30['l'].min(); hi=r30['h'].max()
+                if d == 'SHORT':
+                    sl_p = round(ep+SL_ATR_MULT*atr_val,1); tp_p = round(lo,1)
+                else:
+                    sl_p = round(ep-SL_ATR_MULT*atr_val,1); tp_p = round(hi,1)
+                cs = 'buy' if d=='SHORT' else 'sell'
+                self.ex.create_order(SYMBOL,'STOP_MARKET',cs,qty,None,params={'stopPrice':sl_p,'positionSide':d})
+                self.ex.create_order(SYMBOL,'TAKE_PROFIT_MARKET',cs,qty,None,params={'stopPrice':tp_p,'positionSide':d})
+                log(f'裸仓已保护: SL={sl_p:.0f} TP={tp_p:.0f}')
+        except Exception as e:
+            log(f'裸仓异常: {e}')
+
 
 # ── 状态 ──────────────────────────────────────────
 
@@ -618,11 +623,15 @@ def main():
 
             # 4. 开仓
             if direction and not executor.has_position(direction) and plan:
-                # 先取消可能残留的旧条件单
-                executor.cancel_all_sl_tp()
-                executor.open_position(plan)
-                state['last_signal'] = direction
-                save_state(state)
+                if executor.has_open_order(direction):
+                    if executor.update_order_if_stale(plan):
+                        state['last_signal'] = direction
+                        save_state(state)
+                    # else: silently skip, order still valid
+                else:
+                    executor.open_position(plan)
+                    state['last_signal'] = direction
+                    save_state(state)
 
             # 5. 等待
             elapsed = time.time() - t0

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-HYPE 全自动交易机器人 - Binance 版
+ZEC 全自动交易机器人 - Binance 版
 框架与BTC完全一致：三周期EMA+ADX+DI判方向，4h EMA/Fib共振入场，ATR自适应止损。
-参数：10x杠杆，3 HYPE/笔。
+参数：10x杠杆，3 ZEC/笔。
 """
 import ccxt, pandas as pd, numpy as np, time, json, os, traceback
 from datetime import datetime
 
-SYMBOL = 'HYPE/USDT:USDT'
+SYMBOL = 'ZEC/USDT:USDT'
 LEVERAGE = 10
-POSITION_SIZE = 3.0
+POSITION_SIZE = 0.5
 TIMEFRAMES = ['1h', '4h', '1d']
 SL_ATR_MULT = 1.5
 FIB_LEVELS = [0.236, 0.382]
@@ -18,9 +18,9 @@ DI_RATIO = 1.5
 POLL_SECONDS = 300
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-STATE_FILE = os.path.join(SCRIPT_DIR, 'hype_bn_state.json')
-LOG_FILE = os.path.join(SCRIPT_DIR, 'hype_bn.log')
-TRADE_LOG = os.path.join(SCRIPT_DIR, 'hype_bn_trades.txt')
+STATE_FILE = os.path.join(SCRIPT_DIR, 'zec_bn_state.json')
+LOG_FILE = os.path.join(SCRIPT_DIR, 'zec_bn.log')
+TRADE_LOG = os.path.join(SCRIPT_DIR, 'zec_bn_trades.txt')
 
 API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
 API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
@@ -41,7 +41,7 @@ def log_trade(entry):
     if action == 'OPEN':
         lines += [
             f'操作: 开仓{d_cn}',
-            f'数量: {entry.get("qty")} HYPE | 杠杆: {entry.get("leverage")}x',
+            f'数量: {entry.get("qty")} ZEC | 杠杆: {entry.get("leverage")}x',
             f'入场价: {entry.get("entry_price")} USDT ({entry.get("entry_type","")})',
             f'止损: {entry.get("sl")} USDT (-{entry.get("sl_pct")}%)',
             f'止盈: {entry.get("tp")} USDT (+{entry.get("tp_pct")}%)',
@@ -57,7 +57,7 @@ def log_trade(entry):
     elif action == 'CLOSE':
         lines += [
             f'操作: 平仓{d_cn}',
-            f'数量: {entry.get("qty")} HYPE',
+            f'数量: {entry.get("qty")} ZEC',
             f'开仓价: {entry.get("entry_price")} USDT',
             f'盈亏: {entry.get("upnl")} USDT',
         ]
@@ -283,6 +283,7 @@ class Executor:
 
     def cancel_all_orders(self):
         try:
+            raw_symbol = SYMBOL.split(':')[0].replace('/','')
             open_orders = self.ex.fetch_open_orders(SYMBOL)
             for o in open_orders:
                 self.ex.cancel_order(o['id'], SYMBOL)
@@ -297,10 +298,10 @@ class Executor:
                 q = up.urlencode(params)
                 params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
                 return params
-            p = signed({'symbol': 'HYPEUSDT'})
+            p = signed({'symbol': raw_symbol})
             hd = {'X-MBX-APIKEY': API_KEY}
             for o in rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json():
-                p2 = signed({'symbol': 'HYPEUSDT', 'algoId': o['algoId']})
+                p2 = signed({'symbol': raw_symbol, 'algoId': o['algoId']})
                 rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p2)}', headers=hd)
                 log(f'撤条件单: {o["algoId"]}')
         except Exception as e:
@@ -348,10 +349,10 @@ class Executor:
                 return
             side = 'BUY' if position_side == 'SHORT' else 'SELL'
             self.ex.create_order(SYMBOL, 'market', side.lower(), amt, None, params={'positionSide': position_side})
-            log(f'平仓: {position_side} {amt} HYPE')
+            log(f'平仓: {position_side} {amt} ZEC')
             cr = {
                 'action': 'CLOSE',
-                'symbol': 'HYPE/USDT',
+                'symbol': 'ZEC/USDT',
                 'direction': position_side,
                 'qty': amt,
                 'entry_price': round(float(pos['entryPrice']), 3),
@@ -374,7 +375,7 @@ class Executor:
 
         trade_record = {
             'action': 'OPEN',
-            'symbol': 'HYPE/USDT',
+            'symbol': 'ZEC/USDT',
             'direction': d,
             'qty': qty,
             'leverage': LEVERAGE,
@@ -435,7 +436,7 @@ class Executor:
                 params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
                 return params
 
-            p = signed({'symbol': 'HYPEUSDT'})
+            p = signed({'symbol': 'ZECUSDT'})
             hd = {'X-MBX-APIKEY': API_KEY}
             active_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json()
 
@@ -458,7 +459,7 @@ class Executor:
                 if has_sl and has_tp:
                     continue
 
-                log(f'裸仓: {d} {qty}HYPE 补SL/TP...')
+                log(f'裸仓: {d} {qty}ZEC 补SL/TP...')
 
                 raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
                 df = pd.DataFrame(raw, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
@@ -493,8 +494,8 @@ def save_state(s):
         json.dump(s, f, indent=2, default=str)
 
 def main():
-    log('══════ HYPE自动交易 启动 (币安 10x) ══════')
-    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} HYPE  轮询: {POLL_SECONDS}s')
+    log('══════ ZEC自动交易 启动 (币安 10x) ══════')
+    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} ZEC  轮询: {POLL_SECONDS}s')
 
     exchange = ccxt.binance({
         'apiKey': API_KEY,
