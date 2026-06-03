@@ -26,6 +26,7 @@ SYSTEM_PROMPT = """你是一个资深交易员，帮我在交易信号触发时�
 - 不要逐条复述数据（"费率正常、OI正常、ATR正常"）
 - 不要在没看到问题的时候硬找问题
 - 不要把"持仓多空比略有分歧"当成否决理由
+- 参考历史分析：如果上次否决的理由已不存在（如上次说费率极端现在正常了），可以改判；如果连续多次否决同一方向，想想是不是这个方向就是不对
 
 ## 输出格式
 先写你的判断过程（想到什么说什么，不用列点），最后一行输出:
@@ -37,6 +38,29 @@ REJECTED|{核心风险}
 这币和大盘完全走反了，说明有自己的资金在推。K线实体一根比一根扎实，不是那种拉一根针就砸的。入场价也就差一点点，一个4h波动就能吃到。费率没毛病。
 CONFIRMED|独立走势，K线扎实，可以进
 """
+
+
+def _load_history(coin):
+    """读取同品种最近3次LLM分析历史"""
+    import re
+    raw_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llm_raw_think.log')
+    if not os.path.exists(raw_path):
+        return '(无历史记录)'
+    with open(raw_path) as f:
+        content = f.read()
+    # 提取该币种的分析块
+    blocks = re.split(r'══════ ', content)
+    coin_blocks = [b for b in blocks if b.startswith(f'{coin} ')]
+    if not coin_blocks:
+        return '(无历史记录)'
+    # 取最近3条
+    recent = coin_blocks[-3:]
+    lines = []
+    for i, b in enumerate(recent):
+        b = b.strip()
+        # 截取前400字
+        lines.append(f'--- 历史第{len(recent)-i}次 ---\n{b[:400]}')
+    return '\n\n'.join(lines)
 
 
 def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
@@ -88,7 +112,10 @@ OI价值: ${enrich.get('oi_value',0)/1e6:.1f}M
 大户多空比: {enrich.get('ls_account_ratio','?')}
 
 ## BTC联动
-{btc_line}"""
+{btc_line}
+
+## 同品种历史分析（最近3次）
+{_load_history(coin)}"""
 
     try:
         resp = requests.post(
