@@ -22,10 +22,12 @@ SYSTEM_PROMPT = """你是一个加密货币量化交易的风险审核员。你�
 未平仓合约变化方向: OI↑+价格↑=趋势健康多; OI↑+价格横/跌=主力出货; OI↓+价格↓=多头溃败。
 对比当前OI值和半小时前的变化。
 
-### ③ BTC仅供参考（不否决）
-BTC走势仅作为背景信息参考，不作为否决理由。
-该币是独立行情品种，不跟随大盘走向。
-若BTC与该币方向一致=加分项，不一致=忽略。
+### ③ BTC联动判断（动态）
+先判断该币此刻是否跟随BTC:
+- 该币24h走势与BTC同向且幅度接近 → 跟随BTC → BTC暴跌时跟跌概率高 → 否决
+- 该币24h走势与BTC反向 → 独立行情 → BTC波动可忽略
+- 该币涨跌与BTC无明显关联 → 中性 → BTC仅作参考不否决
+判断依据: 对比24h涨跌幅方向和幅度，而非简单看绝对值。
 
 ### ④ 入场价可达性
 入场价 vs 当前价差距: 差值/ATR > 1.5 = 很可能吃不到，降级。
@@ -59,6 +61,7 @@ def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
     """
     # 构建BTC联动数据
     btc_line = ''
+    coin_change = ''
     try:
         import ccxt
         ex = ccxt.binance({
@@ -66,8 +69,11 @@ def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
             'secret': 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6',
             'options': {'defaultType': 'future'},
         })
+        sym = f'{coin}/USDT:USDT'
+        coin_t = ex.fetch_ticker(sym)
+        coin_change = f"{coin}24h涨跌: {coin_t.get('percentage',0):+.1f}%"
         btc_t = ex.fetch_ticker('BTC/USDT:USDT')
-        btc_line = f"BTC当前: ${btc_t['last']:.0f}  24h涨跌: {btc_t.get('percentage',0):+.1f}%"
+        btc_line = f"BTC24h涨跌: {btc_t.get('percentage',0):+.1f}%  → {coin_change} → 自己判断同向/背离/独立"
     except:
         btc_line = 'BTC数据获取失败'
 
