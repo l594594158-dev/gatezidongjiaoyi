@@ -10,7 +10,8 @@ API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
 API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
 
 SYMBOLS = ['BTC/USDT:USDT', 'HYPE/USDT:USDT', 'ZEC/USDT:USDT',
-           'NEAR/USDT:USDT', 'XLM/USDT:USDT']
+           'NEAR/USDT:USDT', 'XLM/USDT:USDT', 'WLD/USDT:USDT',
+           'ENA/USDT:USDT', 'SUI/USDT:USDT', 'BNB/USDT:USDT']
 
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'watchdog.log')
 

@@ -627,7 +627,7 @@ def main():
                 
                         indicators = {'price': price, 'atr': h4.get('atr',0),
                                        'atr_pct': h4.get('atr_pct',0),
-                                       'raw': str(rationale)[:800]}
+                                       'raw': f'ADX={float(h4.get("adx",0)):.0f} +DI={float(h4.get("plus_di",0)):.0f} -DI={float(h4.get("minus_di",0)):.0f} price={price:.3f} ATR={float(h4.get("atr_pct",0)):.1f}%'}
                 
                         decision, reason = llm_analyze(
                             'BNB', direction, plan['entry'], plan['sl'],

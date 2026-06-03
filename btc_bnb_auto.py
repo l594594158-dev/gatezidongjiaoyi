@@ -576,7 +576,9 @@ class Executor:
                     has_sl = any(float(o.get('triggerPrice',0))<ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
                     has_tp = any(float(o.get('triggerPrice',0))>ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
                 if has_sl and has_tp: continue
-                # 裸仓：补FILLED日志 + 挂SL/TP
+                # 裸仓：先清旧SL/TP再补挂
+                self.cancel_all_sl_tp()
+                # 补FILLED日志 + 挂SL/TP
                 log_trade({
                     'action': 'FILLED', 'direction': d, 'qty': qty,
                     'entry_price': round(ep, 3),
@@ -701,7 +703,7 @@ def main():
                 
                         indicators = {'price': price, 'atr': float(h4.get('atr',0)),
                                        'atr_pct': float(h4.get('atr_pct',0)),
-                                       'raw': str(rationale)[:800]}
+                                       'raw': f'ADX={float(h4.get("adx",0)):.0f} +DI={float(h4.get("plus_di",0)):.0f} -DI={float(h4.get("minus_di",0)):.0f} price={price:.3f} ATR={float(h4.get("atr_pct",0)):.1f}%'}
                 
                         decision, reason = llm_analyze(
                             'BTC', direction, plan['entry'], plan['sl'],
