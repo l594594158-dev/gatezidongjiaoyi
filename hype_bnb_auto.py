@@ -490,6 +490,11 @@ class Executor:
                 if has_sl and has_tp:
                     continue
 
+                d_cn = '做空' if d == 'SHORT' else '做多'
+                log_trade({
+                    'action': 'FILLED', 'direction': d, 'qty': qty,
+                    'entry_price': round(ep, 3),
+                })
                 log(f'裸仓: {d} {qty}HYPE 补SL/TP...')
 
                 raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
@@ -538,6 +543,16 @@ def main():
     analyzer = Analyzer(exchange)
     executor = Executor(exchange)
     state = load_state()
+
+    # 启动时清理：有持仓则撤所有限价单，裸仓补SL/TP
+    try:
+        pos_check = executor.get_any_position()
+        if pos_check:
+            executor.cancel_all_orders()
+            log('启动清理: 撤残留限价单')
+        executor.ensure_naked_sl_tp()
+    except Exception as e:
+        log(f'启动清理异常: {e}')
 
     while True:
         try:
