@@ -668,17 +668,39 @@ def main():
                     executor.cancel_all_sl_tp()
                     executor.close_position(pos_side.upper())
 
-            # 4. 开仓
+            # 4. 开仓 (LLM二次确认)
             if direction and not executor.has_position(direction) and plan:
                 if executor.has_open_order(direction):
                     if executor.update_order_if_stale(plan):
                         state['last_signal'] = direction
                         save_state(state)
-                    # else: silently skip, order still valid
                 else:
-                    executor.open_position(plan)
-                    state['last_signal'] = direction
-                    save_state(state)
+                    # LLM二次确认流程
+                    try:
+                        from llm_review import submit_signal, check_response
+                        resp = check_response('BTC')
+                        if resp:
+                            if resp['decision'] == 'CONFIRMED':
+                                log(f'LLM确认: {resp["reason"][:80]}')
+                                executor.open_position(plan)
+                                state['last_signal'] = direction
+                                save_state(state)
+                                # 清理确认文件
+                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'BTC_response.json'))
+                            else:
+                                log(f'LLM否决: {resp["reason"][:80]}')
+                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'BTC_response.json'))
+                        else:
+                            # 提交信号等待审核
+                            ana = rationale.get('details', '')
+                            submit_signal('BTC', direction, plan['entry'], plan['sl'],
+                                        plan['tp'], POSITION_SIZE, LEVERAGE, str(ana)[:500])
+                            log('→ LLM审核中: 信号已提交，等待二次确认')
+                    except Exception as e:
+                        log(f'LLM审核异常({e})，跳过审核直接开仓')
+                        executor.open_position(plan)
+                        state['last_signal'] = direction
+                        save_state(state)
 
             # 5. 等待——拆成30s小段，快速检测限价单成交
             elapsed = time.time() - t0

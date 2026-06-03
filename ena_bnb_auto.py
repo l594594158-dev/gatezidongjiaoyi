@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """
 ENA 全自动交易机器人 - Binance 版
@@ -599,12 +600,30 @@ def main():
                     if executor.update_order_if_stale(plan):
                         state['last_signal'] = direction
                         save_state(state)
-                    # else: silently skip, order still valid
                 else:
-                    executor.open_position(plan)
-                    state['last_signal'] = direction
-                    save_state(state)
-
+                    # LLM二次确认
+                    try:
+                        from llm_review import submit_signal, check_response
+                        resp = check_response('ENA')
+                        if resp:
+                            if resp['decision'] == 'CONFIRMED':
+                                log(f'LLM确认: {resp["reason"][:80]}')
+                                executor.open_position(plan)
+                                state['last_signal'] = direction
+                                save_state(state)
+                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'ENA_response.json'))
+                            else:
+                                log(f'LLM否决: {resp["reason"][:80]}')
+                                os.remove(os.path.join(SCRIPT_DIR, 'signals', 'ENA_response.json'))
+                        else:
+                            submit_signal('ENA', direction, plan['entry'], plan['sl'],
+                                        plan['tp'], POSITION_SIZE, LEVERAGE, str(rationale)[:500])
+                            log('\u2192 LLM审核中: 信号已提交，等待二次确认')
+                    except Exception as e:
+                        log(f'LLM审核异常({e})，跳过审核直接开仓')
+                        executor.open_position(plan)
+                        state['last_signal'] = direction
+                        save_state(state)
             elapsed = time.time() - t0
             time.sleep(max(1, POLL_SECONDS - elapsed))
 
