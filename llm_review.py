@@ -94,6 +94,11 @@ def _write_trade_log(coin, decision, reason, signal_data=None):
     with open(log_path, 'a') as f:
         f.write('\n'.join(lines) + '\n')
 
+    # 同步写入统一LLM分析日志
+    llm_log_path = os.path.join(os.path.dirname(_trade_log_path(coin)), 'llm_analysis.log')
+    with open(llm_log_path, 'a') as f:
+        f.write('\n'.join(lines) + '\n')
+
 
 def llm_confirm(coin, reason=''):
     """LLM调用: 确认交易 → 写入response + 交易日志"""
