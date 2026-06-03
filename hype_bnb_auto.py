@@ -631,7 +631,13 @@ def main():
                         state['last_signal'] = direction
                         save_state(state)
             elapsed = time.time() - t0
-            time.sleep(max(1, POLL_SECONDS - elapsed))
+            # 5. 等待——拆成30s小段，快速检测限价单成交
+            remaining = POLL_SECONDS - elapsed
+            while remaining > 0:
+                chunk = min(30, remaining)
+                time.sleep(chunk)
+                executor.ensure_sl_tp()
+                remaining -= chunk
 
         except KeyboardInterrupt:
             log('退出')
