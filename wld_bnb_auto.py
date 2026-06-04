@@ -473,6 +473,35 @@ class Executor:
             log('SL/TP 已挂载')
             self._pending_plan = None
         except Exception as e:
+            err = str(e)
+            if '-4045' in err:
+                log(f'SL/TP: 检测到订单限制(-4045)，清理所有algo订单...')
+                try:
+                    import requests as rq2, hmac as hm2, hashlib as hl2, urllib.parse as up2
+                    BASE2 = 'https://fapi.binance.com'
+                    def sign2(params):
+                        params['timestamp'] = int(time.time() * 1000)
+                        q2 = up2.urlencode(params)
+                        params['signature'] = hm2.new(API_SECRET.encode(), q2.encode(), hl2.sha256).hexdigest()
+                        return params
+                    p2 = sign2({'symbol': 'WLDUSDT'})
+                    hd2 = {'X-MBX-APIKEY': API_KEY}
+                    all_algos = rq2.get(f'{BASE2}/fapi/v1/openAlgoOrders?{up2.urlencode(p2)}', headers=hd2).json()
+                    if isinstance(all_algos, list):
+                        for aa in all_algos:
+                            try:
+                                p3 = sign2({'symbol': 'WLDUSDT', 'algoId': aa['algoId']})
+                                rq2.delete(f'{BASE2}/fapi/v1/algoOrder?{up2.urlencode(p3)}', headers=hd2)
+                            except: pass
+                        log(f'已清理{len(all_algos)}个algo订单，重试挂SL/TP...')
+                        time.sleep(1)
+                        self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
+                        self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
+                        log('SL/TP 已挂载(重试)')
+                        self._pending_plan = None
+                        return
+                except Exception as e2:
+                    log(f'SL/TP重试也失败: {e2}')
             log(f'SL/TP异常: {e}')
 
     def ensure_naked_sl_tp(self):
@@ -545,11 +574,32 @@ class Executor:
                             break
                     if not has_match:
                         try:
-                            p3 = signed({'symbol': raw_symbol, 'algoId': a['algoId']})
+                            p3 = signed({'symbol': 'WLDUSDT', 'algoId': a['algoId']})
                             rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p3)}', headers=hd)
                             log(f'孤儿清理: {a["algoId"]}')
                         except: pass
         except Exception as e:
+            err = str(e)
+            if '-4045' in err:
+                log(f'检测到订单限制(-4045)，清理所有algo订单...')
+                try:
+                    p2 = signed({'symbol': 'WLDUSDT'})
+                    hd2 = {'X-MBX-APIKEY': API_KEY}
+                    all_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p2)}', headers=hd2).json()
+                    if isinstance(all_algos, list):
+                        for aa in all_algos:
+                            try:
+                                p3 = signed({'symbol': 'WLDUSDT', 'algoId': aa['algoId']})
+                                rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p3)}', headers=hd2)
+                            except: pass
+                        log(f'已清理{len(all_algos)}个algo订单，重试挂SL/TP...')
+                        time.sleep(1)
+                        self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
+                        self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
+                        log(f'裸仓已保护(重试): SL={sl_p:.3f} TP={tp_p:.3f}')
+                        return
+                except Exception as e2:
+                    log(f'裸仓重试也失败: {e2}')
             log(f'裸仓异常: {e}')
 
 def load_state():
@@ -594,8 +644,9 @@ def main():
         try:
             t0 = time.time()
             analyzer.fetch()
-            direction = analyzer.direction()
             plan = analyzer.plan()
+
+            direction = plan["direction"] if plan else None
             price = analyzer.price
             h4 = analyzer.data['4h'].iloc[-1]
 

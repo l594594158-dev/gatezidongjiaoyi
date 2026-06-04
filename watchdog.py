@@ -60,9 +60,13 @@ def main():
 
         has_position = sym in active_symbols
 
+        if not isinstance(algos, list):
+            log(f'{raw}: API返回异常(非列表) → {str(algos)[:100]}')
+            continue
+
         for a in algos:
-            oid = a['algoId']
-            otype = a.get('type', '?')
+            oid = a.get('algoId', a.get('orderId', 0))
+            otype = a.get('orderType', a.get('type', '?'))
 
             if has_position:
                 continue  # 有仓位，条件单保留
