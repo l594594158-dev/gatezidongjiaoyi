@@ -24,6 +24,7 @@ POLL_SECONDS = 15
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATE_FILE = os.path.join(SCRIPT_DIR, 'hype_scalp_state.json')
 LOG_FILE = os.path.join(SCRIPT_DIR, 'hype_scalp.log')
+TRADE_LOG = os.path.join(SCRIPT_DIR, 'hype_scalp_trades.txt')
 
 API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
 API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
@@ -34,6 +35,30 @@ def log(msg):
     print(line, flush=True)
     with open(LOG_FILE, 'a') as f:
         f.write(line + '\n')
+
+def log_trade(action, **kwargs):
+    ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    d = kwargs.get('direction', '')
+    d_cn = '做空' if d == 'SHORT' else '做多'
+    lines = ['═══════════════════════════════════', f'时间: {ts}']
+    if action == 'OPEN':
+        lines += [
+            f'操作: 开仓{d_cn}',
+            f'数量: {kwargs.get("qty")} HYPE | 杠杆: {kwargs.get("leverage")}x',
+            f'入场价: {kwargs.get("entry")} USDT (市价)',
+            f'止盈: {kwargs.get("tp")} USDT (+{kwargs.get("tp_pct")}%)',
+            f'止损: {kwargs.get("sl")} USDT (-{kwargs.get("sl_pct")}%)',
+            f'理由: {kwargs.get("reason", "")}',
+        ]
+    elif action == 'CLOSE':
+        lines += [
+            f'操作: 平仓{d_cn}',
+            f'数量: {kwargs.get("qty")} HYPE',
+            f'盈亏: {kwargs.get("upnl")} USDT',
+        ]
+    lines += ['═══════════════════════════════════', '']
+    with open(TRADE_LOG, 'a') as f:
+        f.write('\n'.join(lines))
 
 def ema(arr, span):
     return pd.Series(arr).ewm(span=span, adjust=True).mean().values
@@ -198,7 +223,9 @@ def main():
                 if pos and abs(float(pos['info']['positionAmt'])) > 0.001:
                     log(f'  持仓中 {pos_dir}，等待平仓')
                 else:
-                    log(f'  已平仓')
+                    upnl = float(pos.get('unrealizedPnl', 0)) if pos else 0
+                    log(f'  已平仓  盈亏: {upnl:.2f} USDT')
+                    log_trade('CLOSE', direction=pos_dir, qty=POSITION_SIZE, upnl=upnl)
                     in_position = False
                     pos_dir = None
 
@@ -234,6 +261,9 @@ def main():
                         {'stopPrice': sl_p, 'positionSide': 'BOTH'})
 
                     log(f'  TP={tp_p:.4f}(+{TP_PCT}%) SL={sl_p:.4f}(-{SL_PCT}%)')
+                    log_trade('OPEN', direction=direction, qty=POSITION_SIZE,
+                              leverage=LEVERAGE, entry=fill, tp=tp_p, sl=sl_p,
+                              tp_pct=TP_PCT, sl_pct=SL_PCT, reason=reason)
                     in_position = True
                     pos_dir = direction
 
