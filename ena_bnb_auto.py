@@ -709,17 +709,16 @@ def main():
                             log(f'LLM否决: {reason[:60]}')
                             _write_trade_log('ENA', 'REJECTED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
                     except Exception as e:
-                        log(f'LLM异常({e})，降级直接开仓')
-                        executor.open_position(plan)
-                        state['last_signal'] = direction
-                        save_state(state)
+                        log(f'LLM异常({e})，安全拒绝开仓')
+                        _write_trade_log('ENA', 'REJECTED', f'LLM异常: {str(e)[:60]}', {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
             elapsed = time.time() - t0
             # 5. 等待——拆成30s小段，快速检测限价单成交
             remaining = POLL_SECONDS - elapsed
             while remaining > 0:
                 chunk = min(30, remaining)
                 time.sleep(chunk)
-                executor.ensure_sl_tp()
+                if executor._pending_plan:
+                    executor.ensure_sl_tp()
                 remaining -= chunk
 
         except KeyboardInterrupt:
