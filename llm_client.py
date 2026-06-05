@@ -132,7 +132,7 @@ OI价值: ${enrich.get('oi_value',0)/1e6:.1f}M
                     {'role': 'user', 'content': user_msg},
                 ],
                 'temperature': 0.1,
-                'max_tokens': 200,
+                'max_tokens': 400,
             },
             timeout=TIMEOUT,
         )
@@ -153,7 +153,13 @@ OI价值: ${enrich.get('oi_value',0)/1e6:.1f}M
                 reason = content[len(prefix):].lstrip('|').strip()
                 return (prefix, reason[:200])
 
-        # 兜底: 如果在输出里找到了关键词
+        # 兜底1: 截断恢复 (max_tokens不够用, 输出被截断在CONFIR/REJECT)
+        if content.rstrip().upper().endswith('CONFIR'):
+            return ('CONFIRMED', f'(截断恢复) {content[-120:]}')
+        if content.rstrip().upper().endswith('REJECT'):
+            return ('REJECTED', f'(截断恢复) {content[-120:]}')
+
+        # 兜底2: 正文含关键词
         if 'CONFIRM' in content.upper() and 'REJECT' not in content.upper():
             return ('CONFIRMED', content[:100])
         if 'REJECT' in content.upper():
