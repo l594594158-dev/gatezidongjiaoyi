@@ -132,7 +132,7 @@ OI价值: ${enrich.get('oi_value',0)/1e6:.1f}M
                     {'role': 'user', 'content': user_msg},
                 ],
                 'temperature': 0.1,
-                'max_tokens': 200,
+                'max_tokens': 512,
             },
             timeout=TIMEOUT,
         )
@@ -141,11 +141,22 @@ OI价值: ${enrich.get('oi_value',0)/1e6:.1f}M
             return ('REJECTED', f'API错误{resp.status_code}')
 
         content = resp.json()['choices'][0]['message']['content'].strip()
+        finish_reason = resp.json()['choices'][0].get('finish_reason', '')
 
         # 写入原始思考（完整LLM回复）
         _raw_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'llm_raw_think.log')
         with open(_raw_path, 'a') as _rf:
-            _rf.write(f'\n══════ {coin} {direction} ══════\n{content}\n')
+            _rf.write(f'\n══════ {coin} {direction} {finish_reason} ══════\n{content}\n')
+
+        # 被截断时先检查关键词兜底
+        truncated = finish_reason == 'length'
+        if truncated:
+            has_confirm = 'CONFIRM' in content.upper()
+            has_reject = 'REJECT' in content.upper()
+            if has_confirm and not has_reject:
+                return ('CONFIRMED', f'[截断] {content[-80:]}')
+            if has_reject:
+                return ('REJECTED', f'[截断] {content[-80:]}')
 
         # 解析 CONFIRMED|reason 或 REJECTED|reason
         for prefix in ['CONFIRMED', 'REJECTED']:
@@ -249,7 +260,7 @@ def manage_position(coin, direction, entry_price, current_price, current_tp, cur
                     {'role': 'user', 'content': user_msg},
                 ],
                 'temperature': 0.1,
-                'max_tokens': 150,
+                'max_tokens': 256,
             },
             timeout=TIMEOUT,
         )
