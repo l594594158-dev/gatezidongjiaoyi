@@ -1,77 +1,77 @@
 {
-  "updated": "2026-06-05 08:00:02 UTC",
+  "updated": "2026-06-05 04:00:02 UTC",
   "coins": {
     "BTC": {
-      "funding_rate": -0.0014,
-      "funding_next": 1780675200000,
-      "oi_contracts": 98253.725,
-      "oi_value": 6196842785.005001,
-      "ls_position_ratio": 1.1917,
-      "ls_account_ratio": 2.2798
+      "funding_rate": 0.0005,
+      "funding_next": 1780646400000,
+      "oi_contracts": 100066.443,
+      "oi_value": 6273735690.3951,
+      "ls_position_ratio": 1.281,
+      "ls_account_ratio": 2.2637
     },
     "HYPE": {
-      "funding_rate": 0.0076,
-      "funding_next": 1780660800000,
-      "oi_contracts": 5783630.88,
-      "oi_value": 363194668.37136,
-      "ls_position_ratio": 1.2884,
-      "ls_account_ratio": 0.8298
+      "funding_rate": 0.005,
+      "funding_next": 1780646400000,
+      "oi_contracts": 6009724.27,
+      "oi_value": 370469452.62415,
+      "ls_position_ratio": 1.3349,
+      "ls_account_ratio": 0.8525
     },
     "ZEC": {
       "funding_rate": 0.01,
-      "funding_next": 1780675200000,
-      "oi_contracts": 730633.97,
-      "oi_value": 225473643.14200002,
-      "ls_position_ratio": 0.9035,
-      "ls_account_ratio": 0.7461
+      "funding_next": 1780646400000,
+      "oi_contracts": 678930.43,
+      "oi_value": 274118161.1125,
+      "ls_position_ratio": 0.8466,
+      "ls_account_ratio": 0.7024
     },
     "NEAR": {
       "funding_rate": 0.01,
-      "funding_next": 1780675200000,
-      "oi_contracts": 49547271.0,
-      "oi_value": 104049269.10000001,
-      "ls_position_ratio": 1.6542,
-      "ls_account_ratio": 1.3063
+      "funding_next": 1780646400000,
+      "oi_contracts": 48896077.0,
+      "oi_value": 103953059.70199999,
+      "ls_position_ratio": 1.6274,
+      "ls_account_ratio": 1.2594
     },
     "XLM": {
       "funding_rate": 0.01,
-      "funding_next": 1780675200000,
-      "oi_contracts": 278911567.0,
-      "oi_value": 53963809.983160004,
-      "ls_position_ratio": 1.187,
-      "ls_account_ratio": 1.0475
+      "funding_next": 1780646400000,
+      "oi_contracts": 295498156.0,
+      "oi_value": 57864448.907919995,
+      "ls_position_ratio": 1.0738,
+      "ls_account_ratio": 0.9802
     },
     "WLD": {
-      "funding_rate": -0.0254,
-      "funding_next": 1780675200000,
-      "oi_contracts": 213730639.0,
-      "oi_value": 115329052.8044,
-      "ls_position_ratio": 1.5019,
-      "ls_account_ratio": 1.5967
+      "funding_rate": -0.0252,
+      "funding_next": 1780646400000,
+      "oi_contracts": 212956610.0,
+      "oi_value": 104604286.832,
+      "ls_position_ratio": 1.6604,
+      "ls_account_ratio": 1.7144
     },
     "ENA": {
-      "funding_rate": -0.0064,
-      "funding_next": 1780660800000,
-      "oi_contracts": 504134900.0,
-      "oi_value": 44505028.971999995,
-      "ls_position_ratio": 1.8882,
-      "ls_account_ratio": 2.5804
+      "funding_rate": 0.0038,
+      "funding_next": 1780646400000,
+      "oi_contracts": 514623098.0,
+      "oi_value": 46012451.19218,
+      "ls_position_ratio": 2.1009,
+      "ls_account_ratio": 2.5273
     },
     "SUI": {
-      "funding_rate": 0.0042,
-      "funding_next": 1780675200000,
-      "oi_contracts": 100338515.5,
-      "oi_value": 71491192.29375,
-      "ls_position_ratio": 1.6429,
-      "ls_account_ratio": 2.2563
+      "funding_rate": 0.0014,
+      "funding_next": 1780646400000,
+      "oi_contracts": 97618529.6,
+      "oi_value": 71300574.01984,
+      "ls_position_ratio": 1.7637,
+      "ls_account_ratio": 2.3025
     },
     "BNB": {
       "funding_rate": 0.0,
-      "funding_next": 1780675200000,
-      "oi_contracts": 581578.81,
-      "oi_value": 345126313.2183,
-      "ls_position_ratio": 1.2788,
-      "ls_account_ratio": 2.7509
+      "funding_next": 1780646400000,
+      "oi_contracts": 604522.4,
+      "oi_value": 360379983.536,
+      "ls_position_ratio": 1.3129,
+      "ls_account_ratio": 2.69
     }
   }
 }

@@ -1,0 +1,711 @@
+[WD][17:06:04] BTCUSDT: 孤儿? 3000001727021691 已清理（无对应持仓）
+[WD][17:06:04] BTCUSDT: 孤儿? 3000001727021691 已清理（无对应持仓）
+[WD][17:06:04] BTCUSDT: 孤儿? 3000001727021682 已清理（无对应持仓）
+[WD][17:06:04] BTCUSDT: 孤儿? 3000001727021682 已清理（无对应持仓）
+[WD][17:06:05] 本轮清理 2 个孤儿条件单
+[WD][17:06:05] 本轮清理 2 个孤儿条件单
+[WD][21:16:04] ZECUSDT: 孤儿? 3000001729641608 已清理（无对应持仓）
+[WD][21:16:04] ZECUSDT: 孤儿? 3000001729641608 已清理（无对应持仓）
+[WD][21:16:04] ZECUSDT: 孤儿? 3000001729641597 已清理（无对应持仓）
+[WD][21:16:04] ZECUSDT: 孤儿? 3000001729641597 已清理（无对应持仓）
+[WD][21:16:05] 本轮清理 2 个孤儿条件单
+[WD][21:16:05] 本轮清理 2 个孤儿条件单
+[WD][21:26:03] ZECUSDT: 孤儿? 3000001729711912 已清理（无对应持仓）
+[WD][21:26:03] ZECUSDT: 孤儿? 3000001729711912 已清理（无对应持仓）
+[WD][21:26:03] ZECUSDT: 孤儿? 3000001729711900 已清理（无对应持仓）
+[WD][21:26:03] ZECUSDT: 孤儿? 3000001729711900 已清理（无对应持仓）
+[WD][21:26:04] 本轮清理 2 个孤儿条件单
+[WD][21:26:04] 本轮清理 2 个孤儿条件单
+[WD][21:49:04] BTCUSDT: 孤儿? 3000001729641662 已清理（无对应持仓）
+[WD][21:49:04] BTCUSDT: 孤儿? 3000001729641662 已清理（无对应持仓）
+[WD][21:49:04] BTCUSDT: 孤儿? 3000001729641651 已清理（无对应持仓）
+[WD][21:49:04] BTCUSDT: 孤儿? 3000001729641651 已清理（无对应持仓）
+[WD][21:49:04] 本轮清理 2 个孤儿条件单
+[WD][21:49:04] 本轮清理 2 个孤儿条件单
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729851100 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729851100 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729851094 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729851094 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729809484 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729809484 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729809473 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729809473 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729719813 已清理（无对应持仓）
+[WD][21:53:04] SUIUSDT: 孤儿? 3000001729719813 已清理（无对应持仓）
+[WD][21:53:05] SUIUSDT: 孤儿? 3000001729719806 已清理（无对应持仓）
+[WD][21:53:05] SUIUSDT: 孤儿? 3000001729719806 已清理（无对应持仓）
+[WD][21:53:05] SUIUSDT: 孤儿? 3000001729641656 已清理（无对应持仓）
+[WD][21:53:05] SUIUSDT: 孤儿? 3000001729641656 已清理（无对应持仓）
+[WD][21:53:05] SUIUSDT: 孤儿? 3000001729641645 已清理（无对应持仓）
+[WD][21:53:05] SUIUSDT: 孤儿? 3000001729641645 已清理（无对应持仓）
+[WD][21:53:05] 本轮清理 8 个孤儿条件单
+[WD][21:53:05] 本轮清理 8 个孤儿条件单
+Traceback (most recent call last):
+  File "/root/zidongjiaoyi/watchdog.py", line 85, in <module>
+    main()
+  File "/root/zidongjiaoyi/watchdog.py", line 64, in main
+    oid = a['algoId']
+          ~^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+[WD][00:02:04] NEARUSDT: 孤儿? 3000001730852555 已清理（无对应持仓）
+[WD][00:02:04] NEARUSDT: 孤儿? 3000001730852555 已清理（无对应持仓）
+[WD][00:02:04] NEARUSDT: 孤儿? 3000001730852533 已清理（无对应持仓）
+[WD][00:02:04] NEARUSDT: 孤儿? 3000001730852533 已清理（无对应持仓）
+[WD][00:02:05] 本轮清理 2 个孤儿条件单
+[WD][00:02:05] 本轮清理 2 个孤儿条件单
+[WD][00:23:04] SUIUSDT: 孤儿? 3000001730300384 已清理（无对应持仓）
+[WD][00:23:04] SUIUSDT: 孤儿? 3000001730300384 已清理（无对应持仓）
+[WD][00:23:04] SUIUSDT: 孤儿? 3000001730300370 已清理（无对应持仓）
+[WD][00:23:04] SUIUSDT: 孤儿? 3000001730300370 已清理（无对应持仓）
+[WD][00:23:04] 本轮清理 2 个孤儿条件单
+[WD][00:23:04] 本轮清理 2 个孤儿条件单
+Traceback (most recent call last):
+  File "/root/zidongjiaoyi/watchdog.py", line 85, in <module>
+    main()
+  File "/root/zidongjiaoyi/watchdog.py", line 64, in main
+    oid = a['algoId']
+          ~^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 537, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 461, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/http/client.py", line 1448, in getresponse
+    response.begin()
+  File "/usr/lib/python3.12/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 707, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ssl.py", line 1252, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ssl.py", line 1104, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 486, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 845, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/util/retry.py", line 472, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 539, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 371, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='fapi.binance.com', port=443): Read timed out. (read timeout=10.0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 662, in fetch
+    response = self.session.request(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 532, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='fapi.binance.com', port=443): Read timed out. (read timeout=10.0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/zidongjiaoyi/watchdog.py", line 85, in <module>
+    main()
+  File "/root/zidongjiaoyi/watchdog.py", line 32, in main
+    positions = exchange.fetch_positions()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/binance.py", line 10454, in fetch_positions
+    return self.fetch_positions_risk(symbols, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/binance.py", line 10624, in fetch_positions_risk
+    response = self.fapiPrivateV3GetPositionRisk(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/binance.py", line 11656, in request
+    response = self.fetch2(path, api, method, params, headers, body, config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 5332, in fetch2
+    raise e
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 5322, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 695, in fetch
+    raise RequestTimeout(details) from e
+ccxt.base.errors.RequestTimeout: binance GET https://fapi.binance.com/fapi/v3/positionRisk?timestamp=1780533004868&recvWindow=10000&signature=ce3952348d7796bccebacfa12b5ba20d87ba2a68e272f5bd1de15bee31f2f311
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732882730 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732882730 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732879149 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732879149 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732879093 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732879093 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732879027 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732879027 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732875425 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732875425 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732872093 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732872093 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732868077 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732868077 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732864518 已清理（无对应持仓）
+[WD][09:05:05] ENAUSDT: 孤儿? 3000001732864518 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732860571 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732860571 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732856768 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732856768 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732853041 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732853041 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732849161 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732849161 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732845180 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732845180 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732841638 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732841638 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732841553 已清理（无对应持仓）
+[WD][09:05:06] ENAUSDT: 孤儿? 3000001732841553 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732841458 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732841458 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732837612 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732837612 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732834035 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732834035 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732830992 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732830992 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732827535 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732827535 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732824138 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732824138 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732821003 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732821003 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732817250 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732817250 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732813485 已清理（无对应持仓）
+[WD][09:05:07] ENAUSDT: 孤儿? 3000001732813485 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732809748 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732809748 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732806145 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732806145 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732806093 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732806093 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732806032 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732806032 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732802433 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732802433 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732798458 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732798458 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732794717 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732794717 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732790913 已清理（无对应持仓）
+[WD][09:05:08] ENAUSDT: 孤儿? 3000001732790913 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732787379 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732787379 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732783376 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732783376 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732778877 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732778877 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732775146 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732775146 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732771363 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732771363 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732767395 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732767395 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732767344 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732767344 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732767282 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732767282 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732763618 已清理（无对应持仓）
+[WD][09:05:09] ENAUSDT: 孤儿? 3000001732763618 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732759350 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732759350 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732755358 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732755358 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732751021 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732751021 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732747229 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732747229 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732743614 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732743614 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732739718 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732739718 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732735801 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732735801 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732731790 已清理（无对应持仓）
+[WD][09:05:10] ENAUSDT: 孤儿? 3000001732731790 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732727611 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732727611 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732727479 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732727479 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732727419 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732727419 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732723328 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732723328 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732719249 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732719249 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732715551 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732715551 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732711425 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732711425 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732707733 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732707733 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732704242 已清理（无对应持仓）
+[WD][09:05:11] ENAUSDT: 孤儿? 3000001732704242 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732700337 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732700337 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732696218 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732696218 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732691731 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732691731 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732686232 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732686232 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732686147 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732686147 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732686083 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732686083 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732681846 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732681846 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732677565 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732677565 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732674063 已清理（无对应持仓）
+[WD][09:05:12] ENAUSDT: 孤儿? 3000001732674063 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732670250 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732670250 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732666025 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732666025 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732662011 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732662011 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732658369 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732658369 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732654513 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732654513 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732650595 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732650595 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732646333 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732646333 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732646277 已清理（无对应持仓）
+[WD][09:05:13] ENAUSDT: 孤儿? 3000001732646277 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732646202 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732646202 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732642408 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732642408 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732638250 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732638250 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732634474 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732634474 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732630625 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732630625 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732627217 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732627217 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732623507 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732623507 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732619738 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732619738 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732616192 已清理（无对应持仓）
+[WD][09:05:14] ENAUSDT: 孤儿? 3000001732616192 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732612691 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732612691 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732609007 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732609007 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732608932 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732608932 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732608871 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732608871 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732605413 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732605413 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732601620 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732601620 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732597948 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732597948 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732594133 已清理（无对应持仓）
+[WD][09:05:15] ENAUSDT: 孤儿? 3000001732594133 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732590308 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732590308 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732586402 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732586402 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732582700 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732582700 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732579041 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732579041 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732575522 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732575522 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732572009 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732572009 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732571946 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732571946 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732571893 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732571893 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732568636 已清理（无对应持仓）
+[WD][09:05:16] ENAUSDT: 孤儿? 3000001732568636 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732564668 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732564668 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732560723 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732560723 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732556843 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732556843 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732553176 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732553176 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732549506 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732549506 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732545937 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732545937 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732541981 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732541981 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732538536 已清理（无对应持仓）
+[WD][09:05:17] ENAUSDT: 孤儿? 3000001732538536 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732534699 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732534699 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732534651 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732534651 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732534593 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732534593 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732531046 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732531046 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732526935 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732526935 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732523053 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732523053 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732519383 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732519383 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732516228 已清理（无对应持仓）
+[WD][09:05:18] ENAUSDT: 孤儿? 3000001732516228 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732513040 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732513040 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732509411 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732509411 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732505891 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732505891 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732502218 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732502218 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732498458 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732498458 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732498406 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732498406 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732498321 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732498321 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732494759 已清理（无对应持仓）
+[WD][09:05:19] ENAUSDT: 孤儿? 3000001732494759 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732491171 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732491171 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732487547 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732487547 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732483839 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732483839 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732480060 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732480060 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732476507 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732476507 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732472813 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732472813 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732469136 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732469136 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732465561 已清理（无对应持仓）
+[WD][09:05:20] ENAUSDT: 孤儿? 3000001732465561 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732462146 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732462146 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732462094 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732462094 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732462026 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732462026 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732458381 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732458381 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732454508 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732454508 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732450706 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732450706 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732446876 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732446876 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732443189 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732443189 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732439498 已清理（无对应持仓）
+[WD][09:05:21] ENAUSDT: 孤儿? 3000001732439498 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732435881 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732435881 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732432345 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732432345 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732428714 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732428714 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732424841 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732424841 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732424790 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732424790 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732424705 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732424705 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732420815 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732420815 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732416775 已清理（无对应持仓）
+[WD][09:05:22] ENAUSDT: 孤儿? 3000001732416775 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732413302 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732413302 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732409863 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732409863 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732406597 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732406597 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732402954 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732402954 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732399172 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732399172 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732395809 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732395809 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732392209 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732392209 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732388657 已清理（无对应持仓）
+[WD][09:05:23] ENAUSDT: 孤儿? 3000001732388657 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732388600 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732388600 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732388546 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732388546 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732385460 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732385460 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732382302 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732382302 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732378935 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732378935 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732375552 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732375552 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732372307 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732372307 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732368993 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732368993 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732365720 已清理（无对应持仓）
+[WD][09:05:24] ENAUSDT: 孤儿? 3000001732365720 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732362327 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732362327 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732359119 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732359119 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732355843 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732355843 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732355793 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732355793 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732355738 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732355738 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732352389 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732352389 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732348912 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732348912 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732345486 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732345486 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732342170 已清理（无对应持仓）
+[WD][09:05:25] ENAUSDT: 孤儿? 3000001732342170 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732338621 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732338621 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732335304 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732335304 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732331999 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732331999 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732328717 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732328717 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732325265 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732325265 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732321870 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732321870 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732321806 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732321806 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732321741 已清理（无对应持仓）
+[WD][09:05:26] ENAUSDT: 孤儿? 3000001732321741 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732318497 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732318497 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732315067 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732315067 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732311578 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732311578 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732308348 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732308348 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732305125 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732305125 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732301784 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732301784 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732298499 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732298499 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732295235 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732295235 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732291947 已清理（无对应持仓）
+[WD][09:05:27] ENAUSDT: 孤儿? 3000001732291947 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732288617 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732288617 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732288566 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732288566 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732288489 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732288489 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732285705 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732285705 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732282261 已清理（无对应持仓）
+[WD][09:05:28] ENAUSDT: 孤儿? 3000001732282261 已清理（无对应持仓）
+[WD][09:05:28] 本轮清理 198 个孤儿条件单
+[WD][09:05:28] 本轮清理 198 个孤儿条件单
+[WD][09:06:05] ENAUSDT: 孤儿? 3000001735722747 已清理（无对应持仓）
+[WD][09:06:05] ENAUSDT: 孤儿? 3000001735722747 已清理（无对应持仓）
+[WD][09:06:05] ENAUSDT: 孤儿? 3000001735718076 已清理（无对应持仓）
+[WD][09:06:05] ENAUSDT: 孤儿? 3000001735718076 已清理（无对应持仓）
+[WD][09:06:05] 本轮清理 2 个孤儿条件单
+[WD][09:06:05] 本轮清理 2 个孤儿条件单
+[WD][09:07:04] ENAUSDT: 孤儿? 3000001735732446 已清理（无对应持仓）
+[WD][09:07:04] ENAUSDT: 孤儿? 3000001735732446 已清理（无对应持仓）
+[WD][09:07:04] ENAUSDT: 孤儿? 3000001735727436 已清理（无对应持仓）
+[WD][09:07:04] ENAUSDT: 孤儿? 3000001735727436 已清理（无对应持仓）
+[WD][09:07:05] 本轮清理 2 个孤儿条件单
+[WD][09:07:05] 本轮清理 2 个孤儿条件单
+[WD][09:08:04] ENAUSDT: 孤儿? 3000001735743199 已清理（无对应持仓）
+[WD][09:08:04] ENAUSDT: 孤儿? 3000001735743199 已清理（无对应持仓）
+[WD][09:08:04] ENAUSDT: 孤儿? 3000001735737735 已清理（无对应持仓）
+[WD][09:08:04] ENAUSDT: 孤儿? 3000001735737735 已清理（无对应持仓）
+[WD][09:08:04] 本轮清理 2 个孤儿条件单
+[WD][09:08:04] 本轮清理 2 个孤儿条件单
+[WD][09:09:04] ZECUSDT: 孤儿? 3000001730934362 已清理（无对应持仓）
+[WD][09:09:04] ZECUSDT: 孤儿? 3000001730934362 已清理（无对应持仓）
+[WD][09:09:04] ZECUSDT: 孤儿? 3000001730934352 已清理（无对应持仓）
+[WD][09:09:04] ZECUSDT: 孤儿? 3000001730934352 已清理（无对应持仓）
+[WD][09:09:05] ENAUSDT: 孤儿? 3000001735752876 已清理（无对应持仓）
+[WD][09:09:05] ENAUSDT: 孤儿? 3000001735752876 已清理（无对应持仓）
+[WD][09:09:05] ENAUSDT: 孤儿? 3000001735748295 已清理（无对应持仓）
+[WD][09:09:05] ENAUSDT: 孤儿? 3000001735748295 已清理（无对应持仓）
+[WD][09:09:05] 本轮清理 4 个孤儿条件单
+[WD][09:09:05] 本轮清理 4 个孤儿条件单
+[WD][09:10:05] ENAUSDT: 孤儿STOP_MARKET 3000001735764267 已清理（无对应持仓）
+[WD][09:10:05] ENAUSDT: 孤儿STOP_MARKET 3000001735764267 已清理（无对应持仓）
+[WD][09:10:06] ENAUSDT: 孤儿STOP_MARKET 3000001735757889 已清理（无对应持仓）
+[WD][09:10:06] ENAUSDT: 孤儿STOP_MARKET 3000001735757889 已清理（无对应持仓）
+[WD][09:10:06] ENAUSDT: 孤儿STOP_MARKET 3000001735757745 已清理（无对应持仓）
+[WD][09:10:06] ENAUSDT: 孤儿STOP_MARKET 3000001735757745 已清理（无对应持仓）
+[WD][09:10:06] 本轮清理 3 个孤儿条件单
+[WD][09:10:06] 本轮清理 3 个孤儿条件单
+[WD][09:11:04] ENAUSDT: 孤儿STOP_MARKET 3000001735770281 已清理（无对应持仓）
+[WD][09:11:04] ENAUSDT: 孤儿STOP_MARKET 3000001735770281 已清理（无对应持仓）
+[WD][09:11:04] 本轮清理 1 个孤儿条件单
+[WD][09:11:04] 本轮清理 1 个孤儿条件单
+[WD][09:20:05] SUIUSDT: 孤儿STOP_MARKET 3000001735787125 已清理（无对应持仓）
+[WD][09:20:05] SUIUSDT: 孤儿STOP_MARKET 3000001735787125 已清理（无对应持仓）
+[WD][09:20:05] 本轮清理 1 个孤儿条件单
+[WD][09:20:05] 本轮清理 1 个孤儿条件单
+[WD][10:05:05] ZECUSDT: 孤儿TAKE_PROFIT_MARKET 3000001735812195 已清理（无对应持仓）
+[WD][10:05:05] ZECUSDT: 孤儿TAKE_PROFIT_MARKET 3000001735812195 已清理（无对应持仓）
+[WD][10:05:05] 本轮清理 1 个孤儿条件单
+[WD][10:05:05] 本轮清理 1 个孤儿条件单
+[WD][13:00:06] BTCUSDT: 孤儿TAKE_PROFIT_MARKET 3000001737344183 已清理（无对应持仓）
+[WD][13:00:06] BTCUSDT: 孤儿TAKE_PROFIT_MARKET 3000001737344183 已清理（无对应持仓）
+[WD][13:00:07] BTCUSDT: 孤儿STOP_MARKET 3000001737344180 已清理（无对应持仓）
+[WD][13:00:07] BTCUSDT: 孤儿STOP_MARKET 3000001737344180 已清理（无对应持仓）
+[WD][13:00:07] 本轮清理 2 个孤儿条件单
+[WD][13:00:07] 本轮清理 2 个孤儿条件单
+[WD][13:06:04] NEARUSDT: 孤儿TAKE_PROFIT_MARKET 3000001735787158 已清理（无对应持仓）
+[WD][13:06:04] NEARUSDT: 孤儿TAKE_PROFIT_MARKET 3000001735787158 已清理（无对应持仓）
+[WD][13:06:04] 本轮清理 1 个孤儿条件单
+[WD][13:06:04] 本轮清理 1 个孤儿条件单
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 203, in _new_conn
+    sock = connection.create_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/usr/lib/python3/dist-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 492, in _make_request
+    raise new_e
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 468, in _make_request
+    self._validate_conn(conn)
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 1097, in _validate_conn
+    conn.connect()
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 611, in connect
+    self.sock = sock = self._new_conn()
+                       ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 212, in _new_conn
+    raise ConnectTimeoutError(
+urllib3.exceptions.ConnectTimeoutError: (<urllib3.connection.HTTPSConnection object at 0x7f7944ddc680>, 'Connection to api.binance.com timed out. (connect timeout=10.0)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 486, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 845, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/urllib3/util/retry.py", line 517, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.binance.com', port=443): Max retries exceeded with url: /sapi/v1/capital/config/getall?timestamp=1780553761830&recvWindow=10000&signature=45c175ca549309cc6ac3bdad8f0d7000fff1a928f8afdb7fc88d1d865697e199 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7f7944ddc680>, 'Connection to api.binance.com timed out. (connect timeout=10.0)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 662, in fetch
+    response = self.session.request(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 507, in send
+    raise ConnectTimeout(e, request=request)
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='api.binance.com', port=443): Max retries exceeded with url: /sapi/v1/capital/config/getall?timestamp=1780553761830&recvWindow=10000&signature=45c175ca549309cc6ac3bdad8f0d7000fff1a928f8afdb7fc88d1d865697e199 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7f7944ddc680>, 'Connection to api.binance.com timed out. (connect timeout=10.0)'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/zidongjiaoyi/watchdog.py", line 89, in <module>
+    main()
+  File "/root/zidongjiaoyi/watchdog.py", line 29, in main
+    exchange.load_markets()
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 1823, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/binance.py", line 2943, in fetch_currencies
+    promises = [self.sapiGetCapitalConfigGetall(params)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/binance.py", line 11656, in request
+    response = self.fetch2(path, api, method, params, headers, body, config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 5332, in fetch2
+    raise e
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 5322, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/ccxt/base/exchange.py", line 695, in fetch
+    raise RequestTimeout(details) from e
+ccxt.base.errors.RequestTimeout: binance GET https://api.binance.com/sapi/v1/capital/config/getall?timestamp=1780553761830&recvWindow=10000&signature=45c175ca549309cc6ac3bdad8f0d7000fff1a928f8afdb7fc88d1d865697e199
+[WD][15:25:13] ENAUSDT: API返回异常(非列表) → {'code': -1021, 'msg': 'Timestamp for this request is outside of the recvWindow.'}
+[WD][15:25:13] ENAUSDT: API返回异常(非列表) → {'code': -1021, 'msg': 'Timestamp for this request is outside of the recvWindow.'}
+[WD][17:45:05] ZECUSDT: 孤儿TAKE_PROFIT_MARKET 3000001737164934 已清理（无对应持仓）
+[WD][17:45:05] ZECUSDT: 孤儿TAKE_PROFIT_MARKET 3000001737164934 已清理（无对应持仓）
+[WD][17:45:05] 本轮清理 1 个孤儿条件单
+[WD][17:45:05] 本轮清理 1 个孤儿条件单
+[WD][18:42:13] SUIUSDT: API返回异常(非列表) → {'code': -1021, 'msg': 'Timestamp for this request is outside of the recvWindow.'}
+[WD][18:42:13] SUIUSDT: API返回异常(非列表) → {'code': -1021, 'msg': 'Timestamp for this request is outside of the recvWindow.'}
