@@ -4,7 +4,7 @@ LLM客户端: bot信号触发 → 调DeepSeek API → 六步综合分析 → 返
 """
 import json, os, time, requests
 
-API_KEY = 'sk-90362f979d1344d29b2baed227cb090f'
+API_KEY = 'YOUR_BINANCE_API_KEY'
 API_URL = 'https://api.deepseek.com/v1/chat/completions'
 MODEL = 'deepseek-chat'
 TIMEOUT = 30
@@ -74,8 +74,8 @@ def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
     try:
         import ccxt
         ex = ccxt.binance({
-            'apiKey': '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB',
-            'secret': 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6',
+            'apiKey': 'YOUR_BINANCE_API_KEY',
+            'secret': 'YOUR_BINANCE_SECRET',
             'options': {'defaultType': 'future'},
         })
         sym = f'{coin}/USDT:USDT'
@@ -287,8 +287,8 @@ def now():
     try:
         import ccxt
         ex = ccxt.binance({
-            'apiKey': '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB',
-            'secret': 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6',
+            'apiKey': 'YOUR_BINANCE_API_KEY',
+            'secret': 'YOUR_BINANCE_SECRET',
             'options': {'defaultType': 'future'},
         })
     except:

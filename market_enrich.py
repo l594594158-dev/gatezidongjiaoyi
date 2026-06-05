@@ -15,8 +15,8 @@ COINS = {
 }
 
 EX = ccxt.binance({
-    'apiKey': '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB',
-    'secret': 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6',
+    'apiKey': 'YOUR_BINANCE_API_KEY',
+    'secret': 'YOUR_BINANCE_SECRET',
     'options': {'defaultType': 'future'},
 })
 
