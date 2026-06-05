@@ -1,7 +1,0 @@
-#!/usr/bin/env python3
-"""Gate.io 统一配置"""
-GATE_API_KEY = 'a261449031d180a2bd5537390261a461'
-GATE_API_SECRET = 'b981402bbeb1f6d7f9ea878bd1972cd0cd7a900de437e5a27646c2c780837d8b'
-
-# DeepSeek LLM (原密钥保留)
-DEEPSEEK_API_KEY = 'sk-90362f979d1344d29b2baed227cb090f'
