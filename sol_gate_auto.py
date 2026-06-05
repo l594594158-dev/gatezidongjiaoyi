@@ -379,11 +379,15 @@ class Executor:
         self._pending_plan = None
 
     def _get_pos_side(self, pos):
-        """Gate: 双向持仓模式用 info.mode, 兼容 positionSide"""
+        """Gate: 双向持仓模式用 info.mode, 归一化为 SHORT/LONG"""
         info = pos.get('info', {})
         if isinstance(info, dict):
             m = info.get('mode', '')
-            if m:
+            if m == 'dual_short':
+                return 'SHORT'
+            elif m == 'dual_long':
+                return 'LONG'
+            elif m:
                 return m.upper()
         return ''
 
