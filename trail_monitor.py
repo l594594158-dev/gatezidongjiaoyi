@@ -16,8 +16,8 @@ from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-API_KEY = 'YOUR_BINANCE_API_KEY'
-API_SECRET = 'YOUR_BINANCE_SECRET'
+API_KEY = 'IlPevOWyWpnC2FgpcRlk7kQX24AjjBh6hhD0l5ki5g43AebJy1GwNPH4D3fzZcI9'
+API_SECRET = 'cdw4Owv1y7llmXZqwHXSTW0pSDEI68EEP0FCMa09bi5r24YenCV4n6vnRzjQpF1I'
 
 DD_THRESHOLD = 0.50   # 峰值回撤50%触发
 POLL_SECONDS = 2       # 2秒轮询

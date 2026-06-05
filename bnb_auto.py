@@ -10,7 +10,7 @@ from datetime import datetime
 
 SYMBOL = 'BNB/USDT:USDT'
 LEVERAGE = 10
-POSITION_SIZE = 0.6
+POSITION_SIZE = 1
 TIMEFRAMES = ['1h', '4h', '1d']
 SL_ATR_MULT = 1.5
 FIB_LEVELS = [0.236, 0.382]
@@ -23,8 +23,8 @@ STATE_FILE = os.path.join(SCRIPT_DIR, 'bnb_bn_state.json')
 LOG_FILE = os.path.join(SCRIPT_DIR, 'bnb_bn.log')
 TRADE_LOG = os.path.join(SCRIPT_DIR, 'bnb_bn_trades.txt')
 
-API_KEY = 'YOUR_BINANCE_API_KEY'
-API_SECRET = 'YOUR_BINANCE_SECRET'
+API_KEY = 'IlPevOWyWpnC2FgpcRlk7kQX24AjjBh6hhD0l5ki5g43AebJy1GwNPH4D3fzZcI9'
+API_SECRET = 'cdw4Owv1y7llmXZqwHXSTW0pSDEI68EEP0FCMa09bi5r24YenCV4n6vnRzjQpF1I'
 
 def log(msg):
     ts = datetime.now().strftime('%H:%M:%S')

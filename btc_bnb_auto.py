@@ -19,9 +19,9 @@ from datetime import datetime
 
 SYMBOL = 'BTC/USDT:USDT'
 EXCHANGE = 'binance'
-LEVERAGE = 20
+LEVERAGE = 10
 MARGIN_PER_TRADE = 15          # 单笔保证金 USDT
-POSITION_SIZE = 0.005          # BTC
+POSITION_SIZE = 0.01          # BTC
 
 TIMEFRAMES = ['1h', '4h', '1d']
 SL_ATR_MULT = 1.5
@@ -40,8 +40,8 @@ TRADE_LOG = os.path.join(SCRIPT_DIR, 'btc_bn_trades.txt')  # 每笔开仓详细�
 
 # ── API 密钥 ──────────────────────────────────────
 
-API_KEY = 'YOUR_BINANCE_API_KEY'
-API_SECRET = 'YOUR_BINANCE_SECRET'
+API_KEY = 'IlPevOWyWpnC2FgpcRlk7kQX24AjjBh6hhD0l5ki5g43AebJy1GwNPH4D3fzZcI9'
+API_SECRET = 'cdw4Owv1y7llmXZqwHXSTW0pSDEI68EEP0FCMa09bi5r24YenCV4n6vnRzjQpF1I'
 
 
 # ── 日志 ──────────────────────────────────────────
