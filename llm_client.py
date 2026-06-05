@@ -4,7 +4,7 @@ LLM客户端: bot信号触发 → 调DeepSeek API → 六步综合分析 → 返
 """
 import json, os, time, requests
 
-API_KEY = 'IlPevOWyWpnC2FgpcRlk7kQX24AjjBh6hhD0l5ki5g43AebJy1GwNPH4D3fzZcI9'
+API_KEY = 'sk-90362f979d1344d29b2baed227cb090f'
 API_URL = 'https://api.deepseek.com/v1/chat/completions'
 MODEL = 'deepseek-chat'
 TIMEOUT = 30
@@ -73,10 +73,11 @@ def analyze(coin, direction, entry, sl, tp, qty, leverage, indicators, enrich):
     coin_change = ''
     try:
         import ccxt
-        ex = ccxt.binance({
-            'apiKey': 'IlPevOWyWpnC2FgpcRlk7kQX24AjjBh6hhD0l5ki5g43AebJy1GwNPH4D3fzZcI9',
-            'secret': 'cdw4Owv1y7llmXZqwHXSTW0pSDEI68EEP0FCMa09bi5r24YenCV4n6vnRzjQpF1I',
-            'options': {'defaultType': 'future'},
+        from gate_config import GATE_API_KEY, GATE_API_SECRET
+        ex = ccxt.gate({
+            'apiKey': GATE_API_KEY,
+            'secret': GATE_API_SECRET,
+            'options': {'defaultType': 'swap'},
         })
         sym = f'{coin}/USDT:USDT'
         coin_t = ex.fetch_ticker(sym)
@@ -213,7 +214,12 @@ def manage_position(coin, direction, entry_price, current_price, current_tp, cur
     btc_line = ''
     try:
         import ccxt
-        ex = ccxt.binance()
+        from gate_config import GATE_API_KEY, GATE_API_SECRET
+        ex = ccxt.gate({
+            'apiKey': GATE_API_KEY,
+            'secret': GATE_API_SECRET,
+            'options': {'defaultType': 'swap'},
+        })
         btc_t = ex.fetch_ticker('BTC/USDT:USDT')
         coin_t = ex.fetch_ticker(f'{coin}/USDT:USDT')
         btc_line = f"BTC24h: {btc_t.get('percentage',0):+.1f}%  {coin}24h: {coin_t.get('percentage',0):+.1f}%"

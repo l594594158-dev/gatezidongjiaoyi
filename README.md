@@ -1,34 +1,41 @@
-# BTC + HYPE 全自动交易系统 (zidongjiaoyi)
+# Gate.io 全自动交易机器人
 
-币安合约，统一框架：三周期EMA+ADX+DI判方向，4h EMA/Fib共振入场，ATR自适应止损。
+基于Binance版完整移植到Gate.io交易所。策略逻辑与Binance版完全一致。
 
 ## 品种
+- BTC/USDT:USDT  100张 (0.01 BTC)
+- ETH/USDT:USDT  50张  (0.5 ETH)
+- SOL/USDT:USDT  10张  (10 SOL)
+- BNB/USDT:USDT  1000张 (1 BNB)
 
-| 脚本 | 品种 | 杠杆 | 仓位 | 状态 |
-|------|------|------|------|------|
-| `btc_bnb_auto.py` | BTC/USDT | 20x | 0.005 BTC | ✅ 运行中 |
-| `hype_bnb_auto.py` | HYPE/USDT | 10x | 3.0 HYPE | ✅ 运行中 |
-| `btc_auto_dynamic.py` | BTC/USDT | Gate备用 | - | 待命 |
+## 策略
+- 三周期EMA+ADX+DI方向判定 (1h/4h/1d)
+- 4h EMA/Fib共振入场
+- ATR自适应止损 (1.5x)
+- 前低/前高结构止盈
+- 峰值回撤50%移动止盈
+- DeepSeek LLM入场二次确认
+- DeepSeek LLM动态止盈管理
 
-## 策略核心（所有品种统一）
-
-- **方向判定**: 1h/4h/日线三周期 EMA5/EMA10 排列 + 4h ADX/DI 方向强度
-- **入场**: 4h EMA + 斐波那契共振区限价挂单
-- **止损**: 1.5 × 4h ATR（波动率自适应）
-- **止盈**: 前 30 根 4h K 线极值（市场结构位）
-- **轮询**: 每 5 分钟
-- **反转**: 方向翻转自动平仓反手
-
-## 日志
-
-| 文件 | 内容 |
-|------|------|
-| `btc_bn.log` / `hype_bn.log` | 运行日志 |
-| `btc_bn_trades.txt` / `hype_bn_trades.txt` | 交易日志（中文，含完整分析依据） |
-
-## 运行
-
-```bash
-python3 btc_bnb_auto.py &
-python3 hype_bnb_auto.py &
+## 部署
 ```
+# 主策略 (300秒轮询)
+python3 btc_gate_auto.py
+python3 eth_gate_auto.py
+python3 sol_gate_auto.py
+python3 bnb_gate_auto.py
+
+# 移动止盈监控 (2秒轮询)
+python3 trail_monitor_gate.py BTC
+python3 trail_monitor_gate.py ETH
+python3 trail_monitor_gate.py SOL
+python3 trail_monitor_gate.py BNB
+
+# 辅助 (cron)
+*/1 * * * * python3 proc_guard_gate.py
+*/1 * * * * python3 watchdog_gate.py
+0 */4 * * * python3 market_enrich_gate.py
+```
+
+## 配置
+编辑 `gate_config.py` 填入Gate.io API密钥和DeepSeek API密钥。

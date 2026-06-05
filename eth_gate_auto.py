@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-SOL 全自动交易机器人 - Binance 版
+BTC 全自动交易机器人 - Gate.io 版
 每5分钟轮询，多周期EMA+ADX+DI动态判方向，
 阻力/支撑共振区入场，ATR自适应止损，前低/前高结构止盈。
+Gate交易所适配层，策略逻辑与Binance版完全一致。
 """
 
 import ccxt
@@ -14,14 +15,15 @@ import os
 import sys
 import traceback
 from datetime import datetime
+from gate_config import GATE_API_KEY, GATE_API_SECRET
 
 # ── 配置 ──────────────────────────────────────────
 
-SYMBOL = 'SOL/USDT:USDT'
-EXCHANGE = 'binance'
+SYMBOL = 'ETH/USDT:USDT'
+EXCHANGE = 'gate'
 LEVERAGE = 10
-MARGIN_PER_TRADE = 10          # 单笔保证金 USDT
-POSITION_SIZE = 10              # SOL
+MARGIN_PER_TRADE = 15          # 单笔保证金 USDT
+POSITION_SIZE = 50            # 合约张数 (0.01 ETH/张=0.5 ETH)
 
 TIMEFRAMES = ['1h', '4h', '1d']
 SL_ATR_MULT = 1.5
@@ -34,17 +36,17 @@ DI_RATIO = 1.5
 POLL_SECONDS = 300             # 5分钟
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-STATE_FILE = os.path.join(SCRIPT_DIR, 'sol_bn_state.json')
-LOG_FILE = os.path.join(SCRIPT_DIR, 'sol_bn.log')
-TRADE_LOG = os.path.join(SCRIPT_DIR, 'sol_bn_trades.txt')  # 每笔开仓详细日志（中文）
+STATE_FILE = os.path.join(SCRIPT_DIR, 'eth_gate_state.json')
+LOG_FILE = os.path.join(SCRIPT_DIR, 'eth_gate.log')
+TRADE_LOG = os.path.join(SCRIPT_DIR, 'eth_gate_trades.txt')
 
 # ── API 密钥 ──────────────────────────────────────
 
-API_KEY = 'IlPevOWyWpnC2FgpcRlk7kQX24AjjBh6hhD0l5ki5g43AebJy1GwNPH4D3fzZcI9'
-API_SECRET = 'cdw4Owv1y7llmXZqwHXSTW0pSDEI68EEP0FCMa09bi5r24YenCV4n6vnRzjQpF1I'
+API_KEY = GATE_API_KEY
+API_SECRET = GATE_API_SECRET
 
 
-# ── 日志 ──────────────────────────────────────────
+# ── 日志 (与Binance版完全一致) ────────────────────
 
 def log(msg: str):
     ts = datetime.now().strftime('%H:%M:%S')
@@ -68,7 +70,7 @@ def log_trade(entry: dict):
 
     if action == 'OPEN':
         lines.append(f'操作: 开仓{d_cn}')
-        lines.append(f'数量: {qty} SOL | 杠杆: {lev}x')
+        lines.append(f'数量: {qty} BTC | 杠杆: {lev}x')
         lines.append(f'入场价: {entry.get("entry_price", "?")} USDT ({entry.get("entry_type", "")})')
         lines.append(f'止损: {entry.get("sl", "?")} USDT (-{entry.get("sl_pct", "?")}%)')
         lines.append(f'止盈: {entry.get("tp", "?")} USDT (+{entry.get("tp_pct", "?")}%)')
@@ -128,7 +130,7 @@ def log_trade(entry: dict):
     log(f'📝 交易日志已写入')
 
 
-# ── 指标 ──────────────────────────────────────────
+# ── 指标 (与Binance版完全一致) ────────────────────
 
 def compute(df: pd.DataFrame) -> pd.DataFrame:
     df['ema5'] = df['close'].ewm(span=EMA_SHORT).mean()
@@ -153,7 +155,7 @@ def compute(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# ── 分析器 ────────────────────────────────────────
+# ── 分析器 (与Binance版完全一致) ──────────────────
 
 class Analyzer:
     def __init__(self, exchange):
@@ -364,6 +366,11 @@ class Analyzer:
         return {'reasons': rationale, 'conclusion': self.direction()}
 
 
+# ═══════════════════════════════════════════════════
+# 以下为 Gate.io 交易所适配层
+# 除交易所API差异外，逻辑与Binance版完全一致
+# ═══════════════════════════════════════════════════
+
 # ── 交易执行器 ────────────────────────────────────
 
 class Executor:
@@ -371,12 +378,20 @@ class Executor:
         self.ex = exchange
         self._pending_plan = None
 
+    def _get_pos_side(self, pos):
+        """Gate: 双向持仓模式用 info.mode, 兼容 positionSide"""
+        info = pos.get('info', {})
+        if isinstance(info, dict):
+            m = info.get('mode', '')
+            if m:
+                return m.upper()
+        return ''
+
     def has_position(self, direction: str) -> bool:
-        """检查是否已有该方向持仓"""
         for p in self.ex.fetch_positions([SYMBOL]):
             if float(p.get('contracts', 0)) > 0:
-                info = p.get('info', {})
-                if info.get('positionSide', '').upper() == direction:
+                ps = self._get_pos_side(p)
+                if ps == direction:
                     return True
         return False
 
@@ -391,52 +406,41 @@ class Executor:
 
     def cancel_all_orders(self):
         try:
-            open_orders = self.ex.fetch_open_orders(SYMBOL)
-            for o in open_orders:
+            for o in self.ex.fetch_open_orders(SYMBOL):
                 self.ex.cancel_order(o['id'], SYMBOL)
-                log(f'撤限价单: {o["id"]}')
+                log(f'撤单: {o["id"][:16]}')
         except Exception as e:
-            log(f'撤限价单异常: {e}')
+            log(f'撤单异常: {e}')
         try:
-            import requests as rq, hmac as hm, hashlib as hl, urllib.parse as up
-            BASE = 'https://fapi.binance.com'
-            def signed(params):
-                params['timestamp'] = int(time.time() * 1000)
-                q = up.urlencode(params)
-                params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
-                return params
-            p = signed({'symbol': 'SOLUSDT'})
-            hd = {'X-MBX-APIKEY': API_KEY}
-            for o in rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json():
-                p2 = signed({'symbol': 'SOLUSDT', 'algoId': o['algoId']})
-                rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p2)}', headers=hd)
-                log(f'撤条件单: {o["algoId"]}')
-        except Exception as e:
-            log(f'撤条件单异常: {e}')
+            for o in self.ex.fetch_open_orders(SYMBOL, params={'trigger': True}):
+                try:
+                    self.ex.cancel_order(o['id'], SYMBOL, params={'trigger': True})
+                except:
+                    pass
+        except:
+            pass
 
     def has_open_order(self, direction):
+        side = 'buy' if direction == 'LONG' else 'sell'
         for o in self.ex.fetch_open_orders(SYMBOL):
-            ps = o.get('info', {}).get('positionSide', '').upper() if isinstance(o.get('info'), dict) else ''
-            side = 'BUY' if direction == 'LONG' else 'SELL'
-            if o['side'].upper() == side and (not ps or ps == direction):
+            if o['side'] == side and not (o.get('reduceOnly') or o.get('reduce_only')):
                 return True
         return False
 
-
     def update_order_if_stale(self, plan):
-        """如果入场价变动超过0.3xATR，撤旧挂新"""
         try:
             orders = self.ex.fetch_open_orders(SYMBOL)
             if not orders:
                 return False
             new_entry = plan['entry']
             atr = plan.get('atr', 0)
-            threshold = 0.3 * atr  # ATR自适应阈值
+            threshold = 0.3 * atr
             for o in orders:
+                if o.get('reduceOnly') or o.get('reduce_only'):
+                    continue
                 old_price = float(o['price'])
-                change_pct = abs(new_entry - old_price) / old_price * 100
                 if abs(new_entry - old_price) > threshold:
-                    log(f'入场价变动: {old_price:.3f}->{new_entry:.3f} ({change_pct:.2f}% > {threshold/new_entry*100:.2f}%阈值), 撤旧挂新')
+                    log(f'入场价变动: {old_price:.3f}->{new_entry:.3f}, 撤旧挂新')
                     self.cancel_all_orders()
                     self.open_position(plan)
                     return True
@@ -445,6 +449,67 @@ class Executor:
             log(f'update_order_if_stale异常: {e}')
             return False
 
+    def close_position(self, position_side: str):
+        """市价平仓"""
+        try:
+            pos = self.get_any_position()
+            if not pos:
+                return
+            amt = abs(float(pos.get('contracts', 0)))
+            if amt <= 0:
+                return
+            side = 'buy' if position_side == 'SHORT' else 'sell'
+            self.ex.create_order(SYMBOL, 'market', side, amt, None, params={'reduceOnly': True})
+            log(f'平仓: {position_side} {amt}张')
+            close_record = {
+                'action': 'CLOSE', 'direction': position_side, 'qty': amt,
+                'entry_price': round(float(pos['entryPrice']), 1) if pos.get('entryPrice') else None,
+                'close_reason': 'signal_reversal',
+                'upnl': round(float(pos.get('unrealizedPnl', 0)), 4),
+            }
+            log_trade(close_record)
+        except Exception as e:
+            log(f'平仓异常: {e}')
+
+    def open_position(self, plan: dict):
+        d = plan['direction']
+        side = 'sell' if d == 'SHORT' else 'buy'
+        entry = plan['entry']
+        sl = plan['sl']
+        tp = plan['tp']
+        qty = POSITION_SIZE
+
+        log(f'开{d}: 限价 {entry:.0f}  SL={sl:.0f}  TP={tp:.0f}  qty={qty}')
+
+        trade_record = {
+            'action': 'OPEN', 'direction': d, 'qty': qty,
+            'leverage': LEVERAGE,
+            'entry_price': round(entry, 1),
+            'entry_type': plan.get('entry_name', 'limit'),
+            'sl': round(sl, 1),
+            'sl_pct': round(abs(sl - entry) / entry * 100, 2),
+            'tp': round(tp, 1),
+            'tp_pct': round(abs(entry - tp) / entry * 100, 2),
+            'analysis': plan.get('analysis', {}),
+        }
+        log_trade(trade_record)
+
+        try:
+            self.ex.set_leverage(LEVERAGE, SYMBOL)
+            order = self.ex.create_order(SYMBOL, 'limit', side, qty, entry)
+            log(f'限价单: {order["id"]} {side} {qty} @ {entry:.0f}')
+            self._pending_plan = {
+                'order_id': order['id'],
+                'direction': d,
+                'sl': sl,
+                'tp': tp,
+                'qty': qty,
+                'trade_record': trade_record,
+            }
+        except Exception as e:
+            log(f'开仓异常: {e}')
+
+    # ── 移动止盈状态管理 ──
 
     def _write_trail_state(self, plan):
         try:
@@ -459,10 +524,9 @@ class Executor:
                 "min_profit": max(1.5 * atr / entry_p * 100, 2.0) if entry_p > 0 else 2.0,
                 "sl": plan["sl"],
             }
-            import json as _j
             path = os.path.join(SCRIPT_DIR, f"{coin}_trail_state.json")
             with open(path, "w") as _f:
-                _j.dump(state, _f)
+                json.dump(state, _f)
         except:
             pass
 
@@ -470,13 +534,12 @@ class Executor:
         try:
             coin = SYMBOL.split("/")[0].lower()
             path = os.path.join(SCRIPT_DIR, f"{coin}_trail_state.json")
-            import json as _j
             if os.path.exists(path):
                 with open(path) as _f:
-                    state = _j.load(_f)
+                    state = json.load(_f)
                 state["dynamic_tp"] = new_tp
                 with open(path, "w") as _f:
-                    _j.dump(state, _f)
+                    json.dump(state, _f)
         except:
             pass
 
@@ -484,92 +547,55 @@ class Executor:
         try:
             coin = SYMBOL.split("/")[0].lower()
             path = os.path.join(SCRIPT_DIR, f"{coin}_trail_state.json")
-            import json as _j
             if os.path.exists(path):
                 with open(path) as _f:
-                    state = _j.load(_f)
+                    state = json.load(_f)
                 state["active"] = False
                 with open(path, "w") as _f:
-                    _j.dump(state, _f)
+                    json.dump(state, _f)
         except:
             pass
 
-    def close_position(self, position_side: str):
-        """市价平仓"""
+    def _get_current_tp(self, direction):
+        """Gate: 获取当前止盈限价单价格"""
+        cs = 'sell' if direction == 'LONG' else 'buy'
+        for o in self.ex.fetch_open_orders(SYMBOL):
+            if (o.get('reduceOnly') or o.get('reduce_only')) and o.get('type') == 'limit':
+                if o.get('side') == cs:
+                    return float(o.get('price', 0))
+        return 0
+
+    def _replace_tp(self, direction, qty, new_tp):
+        """Gate: 取消旧TP limit单 + 挂新TP limit单"""
+        cs = 'sell' if direction == 'LONG' else 'buy'
+        for o in self.ex.fetch_open_orders(SYMBOL):
+            if (o.get('reduceOnly') or o.get('reduce_only')) and o.get('type') == 'limit':
+                if o.get('side') == cs:
+                    try:
+                        self.ex.cancel_order(o['id'], SYMBOL)
+                    except:
+                        pass
+        self.ex.create_order(SYMBOL, 'limit', cs, qty, new_tp, params={'reduceOnly': True})
+
+    def _create_sl_tp_orders(self, d, qty, sl_p, tp_p):
+        """Gate: SL=market trigger reduceOnly, TP=limit reduceOnly"""
+        close_side = 'buy' if d == 'SHORT' else 'sell'
         try:
-            pos = self.get_any_position()
-            if not pos:
-                return
-            info = pos.get('info', {})
-            amt = abs(float(info.get('positionAmt', 0)))
-            if amt <= 0:
-                return
-            side = 'BUY' if position_side == 'SHORT' else 'SELL'
-            self.ex.create_order(SYMBOL, 'market', side.lower(), amt, None,
-                                 params={'positionSide': position_side})
-            log(f'平仓: {position_side} {amt} BTC')
-            # 写入平仓日志
-            close_record = {
-                'action': 'CLOSE',
-                'symbol': 'BTC/USDT',
-                'direction': position_side,
-                'qty': amt,
-                'entry_price': round(float(pos['entryPrice']), 1) if pos.get('entryPrice') else None,
-                'close_reason': 'signal_reversal',
-                'upnl': round(float(pos.get('unrealizedPnl', 0)), 4),
-            }
-            log_trade(close_record)
+            self.ex.create_order(SYMBOL, 'market', close_side, qty, None, params={
+                'triggerPrice': sl_p, 'reduceOnly': True
+            })
+            log(f'止损已挂: {sl_p:.1f}')
         except Exception as e:
-            log(f'平仓异常: {e}')
-
-    def open_position(self, plan: dict):
-        """按计划开仓"""
-        d = plan['direction']
-        side = 'sell' if d == 'SHORT' else 'buy'
-        entry = plan['entry']
-        sl = plan['sl']
-        tp = plan['tp']
-        qty = POSITION_SIZE
-
-        log(f'开{d}: 限价 {entry:.0f}  SL={sl:.0f}  TP={tp:.0f}  qty={qty}')
-
-        # 写入详细交易日志
-        trade_record = {
-            'action': 'OPEN',
-            'symbol': 'BTC/USDT',
-            'direction': d,
-            'qty': qty,
-            'leverage': LEVERAGE,
-            'entry_price': round(entry, 1),
-            'entry_type': plan.get('entry_name', 'limit'),
-            'sl': round(sl, 1),
-            'sl_pct': round(abs(sl - entry) / entry * 100, 2),
-            'tp': round(tp, 1),
-            'tp_pct': round(abs(entry - tp) / entry * 100, 2),
-            'analysis': plan.get('analysis', {}),
-        }
-        log_trade(trade_record)
-
+            log(f'挂止损异常: {e}')
         try:
-            self.ex.set_leverage(LEVERAGE, SYMBOL)
-            order = self.ex.create_order(
-                SYMBOL, 'limit', side, qty, entry,
-                params={'positionSide': d}
-            )
-            log(f'限价单: {order["id"]} {side} {qty} @ {entry:.0f}')
-            self._pending_plan = {
-                'order_id': order['id'],
-                'direction': d,
-                'sl': sl,
-                'tp': tp,
-                'qty': qty,
-                'trade_record': trade_record,
-            }
+            self.ex.create_order(SYMBOL, 'limit', close_side, qty, tp_p, params={
+                'reduceOnly': True
+            })
+            log(f'止盈已挂: {tp_p:.1f}')
         except Exception as e:
-            log(f'开仓异常: {e}')
+            log(f'挂止盈异常: {e}')
 
     def ensure_sl_tp(self):
-        """成交后挂SL/TP"""
         if not self._pending_plan:
             return
         plan = self._pending_plan
@@ -582,88 +608,52 @@ class Executor:
             sl_p = round(plan['sl'], 1)
             tp_p = round(plan['tp'], 1)
             qty = plan['qty']
-            close_side = 'buy' if d == 'SHORT' else 'sell'
 
             log(f'成交! 挂SL/TP: {d} SL={sl_p:.1f} TP={tp_p:.1f}')
-
-            # 止损: STOP_MARKET, 不带reduceOnly
-            self.ex.create_order(SYMBOL, 'STOP_MARKET', close_side, qty, None, params={
-                'stopPrice': sl_p, 'positionSide': d
-            })
-            # 止盈: TAKE_PROFIT_MARKET
-            self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', close_side, qty, None, params={
-                'stopPrice': tp_p, 'positionSide': d
-            })
+            self._create_sl_tp_orders(d, qty, sl_p, tp_p)
             log('SL/TP 已挂载')
             self._pending_plan = None
             self._write_trail_state(plan)
         except Exception as e:
-            err = str(e)
-            if '-4045' in err:
-                log(f'SL/TP: 检测到订单限制(-4045)，清理所有algo订单...')
-                try:
-                    import requests as rq2, hmac as hm2, hashlib as hl2, urllib.parse as up2
-                    BASE2 = 'https://fapi.binance.com'
-                    def sign2(params):
-                        params['timestamp'] = int(time.time() * 1000)
-                        q2 = up2.urlencode(params)
-                        params['signature'] = hm2.new(API_SECRET.encode(), q2.encode(), hl2.sha256).hexdigest()
-                        return params
-                    p2 = sign2({'symbol': 'SOLUSDT'})
-                    hd2 = {'X-MBX-APIKEY': API_KEY}
-                    all_algos = rq2.get(f'{BASE2}/fapi/v1/openAlgoOrders?{up2.urlencode(p2)}', headers=hd2).json()
-                    if isinstance(all_algos, list):
-                        for aa in all_algos:
-                            try:
-                                p3 = sign2({'symbol': 'SOLUSDT', 'algoId': aa['algoId']})
-                                rq2.delete(f'{BASE2}/fapi/v1/algoOrder?{up2.urlencode(p3)}', headers=hd2)
-                            except: pass
-                        log(f'已清理{len(all_algos)}个algo订单，重试挂SL/TP...')
-                        time.sleep(1)
-                        self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
-                        self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
-                        log('SL/TP 已挂载(重试)')
-                        self._pending_plan = None
-                        self._write_trail_state(plan)
-                        return
-                except Exception as e2:
-                    log(f'SL/TP重试也失败: {e2}')
             log(f'SL/TP异常: {e}')
 
     def ensure_naked_sl_tp(self):
         try:
-            import requests as rq, hmac as hm, hashlib as hl, urllib.parse as up
-            BASE = 'https://fapi.binance.com'
-            def signed(params):
-                params['timestamp'] = int(time.time() * 1000)
-                q = up.urlencode(params)
-                params['signature'] = hm.new(API_SECRET.encode(), q.encode(), hl.sha256).hexdigest()
-                return params
-            p = signed({'symbol': 'SOLUSDT'})
-            hd = {'X-MBX-APIKEY': API_KEY}
-            active_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p)}', headers=hd).json()
             for pos in self.ex.fetch_positions([SYMBOL]):
-                info = pos.get('info', {})
-                amt = float(info.get('positionAmt', 0))
-                if amt == 0: continue
-                d = info.get('positionSide', '')
-                qty = abs(amt)
-                ep = float(pos['entryPrice'])
-                if d == 'SHORT':
-                    has_sl = any(float(o.get('triggerPrice',0))>ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
-                    has_tp = any(float(o.get('triggerPrice',0))<ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
-                else:
-                    has_sl = any(float(o.get('triggerPrice',0))<ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
-                    has_tp = any(float(o.get('triggerPrice',0))>ep and abs(float(o.get('quantity',0))-qty)<0.01 for o in active_algos)
-                if has_sl and has_tp: continue
-                # 裸仓：先清旧SL/TP再补挂
+                size = float(pos.get('contracts', 0))
+                if size == 0:
+                    continue
+                qty = abs(size)
+                ep = float(pos['entryPrice']) if pos.get('entryPrice') else 0
+                if ep <= 0:
+                    continue
+
+                d = self._get_pos_side(pos)
+                if not d:
+                    continue
+
+                # 检查已有SL/TP
+                has_sl = False; has_tp = False
+                cs = 'sell' if d == 'LONG' else 'buy'
+                for o in self.ex.fetch_open_orders(SYMBOL):
+                    if o.get('reduceOnly') or o.get('reduce_only'):
+                        if o.get('side') == cs:
+                            if o.get('triggerPrice'):
+                                has_sl = True
+                            elif o.get('type') == 'limit':
+                                has_tp = True
+                for o in self.ex.fetch_open_orders(SYMBOL, params={'trigger': True}):
+                    if (o.get('reduceOnly') or o.get('reduce_only')) and o.get('side') == cs:
+                        has_sl = True
+                if has_sl and has_tp:
+                    continue
+
                 self.cancel_all_sl_tp()
-                # 补FILLED日志 + 挂SL/TP
                 log_trade({
                     'action': 'FILLED', 'direction': d, 'qty': qty,
                     'entry_price': round(ep, 3),
                 })
-                log(f'裸仓: {d} {qty}BTC 补SL/TP...')
+                log(f'裸仓: {d} {qty}张 补SL/TP...')
                 raw = self.ex.fetch_ohlcv(SYMBOL, '4h', limit=60)
                 df = pd.DataFrame(raw, columns=['ts','o','h','l','c','v'])
                 tr = pd.concat([df['h']-df['l'],abs(df['h']-df['c'].shift(1)),abs(df['l']-df['c'].shift(1))],axis=1).max(axis=1)
@@ -673,33 +663,9 @@ class Executor:
                     sl_p = round(ep+SL_ATR_MULT*atr_val,1); tp_p = round(lo,1)
                 else:
                     sl_p = round(ep-SL_ATR_MULT*atr_val,1); tp_p = round(hi,1)
-                cs = 'buy' if d=='SHORT' else 'sell'
-                self.ex.create_order(SYMBOL,'STOP_MARKET',cs,qty,None,params={'stopPrice':sl_p,'positionSide':d})
-                self.ex.create_order(SYMBOL,'TAKE_PROFIT_MARKET',cs,qty,None,params={'stopPrice':tp_p,'positionSide':d})
+                self._create_sl_tp_orders(d, qty, sl_p, tp_p)
                 log(f'裸仓已保护: SL={sl_p:.0f} TP={tp_p:.0f}')
-
         except Exception as e:
-            err = str(e)
-            if '-4045' in err:
-                log(f'检测到订单限制(-4045)，清理所有algo订单...')
-                try:
-                    p2 = signed({'symbol': 'SOLUSDT'})
-                    hd2 = {'X-MBX-APIKEY': API_KEY}
-                    all_algos = rq.get(f'{BASE}/fapi/v1/openAlgoOrders?{up.urlencode(p2)}', headers=hd2).json()
-                    if isinstance(all_algos, list):
-                        for aa in all_algos:
-                            try:
-                                p3 = signed({'symbol': 'SOLUSDT', 'algoId': aa['algoId']})
-                                rq.delete(f'{BASE}/fapi/v1/algoOrder?{up.urlencode(p3)}', headers=hd2)
-                            except: pass
-                        log(f'已清理{len(all_algos)}个algo订单，重试挂SL/TP...')
-                        time.sleep(1)
-                        self.ex.create_order(SYMBOL, 'STOP_MARKET', cs, qty, None, params={'stopPrice': sl_p, 'positionSide': d})
-                        self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
-                        log(f'裸仓已保护(重试): SL={sl_p:.3f} TP={tp_p:.3f}')
-                        return
-                except Exception as e2:
-                    log(f'裸仓重试也失败: {e2}')
             log(f'裸仓异常: {e}')
 
 
@@ -716,30 +682,39 @@ def save_state(s):
         json.dump(s, f, indent=2, default=str)
 
 
-# ── 主循环 ────────────────────────────────────────
+# ── Gate.io 初始化 ────────────────────────────────
 
-def main():
-    log('══════ BTC自动交易 启动 (币安 20x) ══════')
-    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} SOL  轮询: {POLL_SECONDS}s')
-
-    exchange = ccxt.binance({
+def make_exchange():
+    exchange = ccxt.gate({
         'apiKey': API_KEY,
         'secret': API_SECRET,
-        'options': {'defaultType': 'future'},
+        'options': {'defaultType': 'swap'},
     })
     exchange.load_markets()
+    try:
+        exchange.set_position_mode(True, SYMBOL)
+    except:
+        pass
+    return exchange
 
+
+# ── 主循环 (与Binance版逻辑完全一致) ──────────────
+
+def main():
+    log('══════ ETH自动交易 启动 (Gate.io 10x) ══════')
+    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} BTC  轮询: {POLL_SECONDS}s')
+
+    exchange = make_exchange()
     analyzer = Analyzer(exchange)
     executor = Executor(exchange)
     state = load_state()
 
-    # 启动时清理：有持仓则撤所有限价单，裸仓补SL/TP
+    # 启动清理
     try:
         pos_check = executor.get_any_position()
         if pos_check:
-            # 只撤限价单，不碰SL/TP(否则ensure_naked会重复写FILLED)
             for o in executor.ex.fetch_open_orders(SYMBOL):
-                if o.get('type', '') not in ('STOP_MARKET', 'TAKE_PROFIT_MARKET', 'LIMIT_STOP_MARKET', 'LIMIT_TAKE_PROFIT_MARKET'):
+                if not (o.get('reduceOnly') or o.get('reduce_only')):
                     executor.ex.cancel_order(o['id'], SYMBOL)
             log('启动清理: 撤残留限价单')
         executor.ensure_naked_sl_tp()
@@ -761,14 +736,12 @@ def main():
             log(f'── 价格:{price:.0f} 方向:{direction or "观望"} '
                 f'ADX:{h4["adx"]:.0f} +DI:{h4["plus_di"]:.0f} -DI:{h4["minus_di"]:.0f}')
 
-
             # ── 移动止盈管理 ──
             pos = executor.get_any_position()
             if pos and direction:
-                info = pos.get("info", {})
-                pos_side = info.get("positionSide", "")
-                entry_p = float(info.get("entryPrice", 0) or 0)
-                if entry_p > 0 and pos_side.upper() == direction:
+                pos_side = executor._get_pos_side(pos)
+                entry_p = float(pos.get('entryPrice', 0) or 0)
+                if entry_p > 0 and pos_side == direction:
                     pnl_pct = (price - entry_p) / entry_p * 100
                     if direction == "SHORT":
                         pnl_pct = -pnl_pct
@@ -780,6 +753,7 @@ def main():
                         peak_pnl = pnl_pct
                         state[peak_key] = peak_pnl
                         save_state(state)
+                    # 利润回撤50%止盈
                     if peak_pnl > MIN_PROFIT and pnl_pct < peak_pnl * 0.5:
                         log(f"利润回撤止盈！峰值{peak_pnl:.1f}%→{pnl_pct:.1f}%")
                         executor.cancel_all_sl_tp()
@@ -788,26 +762,13 @@ def main():
                         state.pop("last_signal", None)
                         save_state(state)
                         continue
+                    # LLM动态调整止盈位
                     if pnl_pct >= MIN_PROFIT:
-                        try:
-                            current_tp = 0
-                            import requests as _rq3, hmac as _hm3, hashlib as _hl3, urllib.parse as _up3
-                            BASE3 = "https://fapi.binance.com"
-                            def _sign3(params):
-                                params["timestamp"] = int(time.time() * 1000)
-                                q3 = _up3.urlencode(params)
-                                params["signature"] = _hm3.new(API_SECRET.encode(), q3.encode(), _hl3.sha256).hexdigest()
-                                return params
-                            p3 = _sign3({"symbol": SYMBOL.replace("/USDT:USDT", "USDT")})
-                            hd3 = {"X-MBX-APIKEY": API_KEY}
-                            algos = _rq3.get(f"{BASE3}/fapi/v1/openAlgoOrders?{_up3.urlencode(p3)}", headers=hd3).json()
-                            if isinstance(algos, list):
-                                for a in algos:
-                                    if a.get("positionSide") == direction and a.get("orderType") == "TAKE_PROFIT_MARKET":
-                                        current_tp = float(a.get("stopPrice", 0))
-                                        break
-                            if current_tp > 0:
+                        current_tp = executor._get_current_tp(direction)
+                        if current_tp > 0:
+                            try:
                                 from llm_client import manage_position as llm_manage
+                                qty_tp = abs(float(pos.get('contracts', 0)))
                                 indicators_raw = f"ADX={float(h4['adx']):.0f} +DI={float(h4['plus_di']):.0f} -DI={float(h4['minus_di']):.0f} price={price:.1f} pnl={pnl_pct:+.1f}% peak={peak_pnl:.1f}%"
                                 coin_name = SYMBOL.split("/")[0]
                                 result = llm_manage(
@@ -819,95 +780,77 @@ def main():
                                     reason = result[2] if len(result) > 2 else ""
                                     action_cn = "放宽" if result[0] == "WIDEN" else "收紧"
                                     log(f"LLM移动止盈: {current_tp:.1f}→{new_tp:.1f} [{action_cn}] {reason[:50]}")
-                                    import requests as _rq4, hmac as _hm4, hashlib as _hl4, urllib.parse as _up4
-                                    BASE4 = "https://fapi.binance.com"
-                                    def _sign4(params):
-                                        params["timestamp"] = int(time.time() * 1000)
-                                        q4 = _up4.urlencode(params)
-                                        params["signature"] = _hm4.new(API_SECRET.encode(), q4.encode(), _hl4.sha256).hexdigest()
-                                        return params
-                                    p4 = _sign4({"symbol": SYMBOL.replace("/USDT:USDT", "USDT")})
-                                    hd4 = {"X-MBX-APIKEY": API_KEY}
-                                    algos4 = _rq4.get(f"{BASE4}/fapi/v1/openAlgoOrders?{_up4.urlencode(p4)}", headers=hd4).json()
-                                    if isinstance(algos4, list):
-                                        for a in algos4:
-                                            if a.get("positionSide") == direction and a.get("orderType") == "TAKE_PROFIT_MARKET":
-                                                p5 = _sign4({"symbol": SYMBOL.replace("/USDT:USDT", "USDT"), "algoId": a["algoId"]})
-                                                _rq4.delete(f"{BASE4}/fapi/v1/algoOrder?{_up4.urlencode(p5)}", headers=hd4)
-                                                break
-                                    close_side = "buy" if direction == "SHORT" else "sell"
-                                    qty = abs(float(pos["info"].get("positionAmt", 0)))
-                                    executor.ex.create_order(SYMBOL, "TAKE_PROFIT_MARKET", close_side, qty, None, params={"stopPrice": new_tp, "positionSide": direction})
+                                    executor._replace_tp(direction, qty_tp, new_tp)
                                     executor._update_trail_tp(direction, new_tp)
                                 elif result[0] == "KEEP":
                                     log(f"LLM移动止盈: 维持 | 浮盈{pnl_pct:+.1f}%")
-                        except Exception as e:
-                            log(f"移动止盈异常: {e}")
+                            except Exception as e:
+                                log(f"移动止盈异常: {e}")
 
             # 2. 检查已有成交的SL/TP
             executor.ensure_sl_tp()
-            # 2b. 确保已有持仓都有SL/TP（裸仓防护）
             executor.ensure_naked_sl_tp()
 
-            # 2c. 方向消失 → 撤所有限价单
+            # 方向消失 → 撤限价单
             if not direction:
-                open_orders = executor.ex.fetch_open_orders(SYMBOL)
-                for o in open_orders:
-                    if o.get('type', '') not in ('STOP_MARKET', 'TAKE_PROFIT_MARKET'):
+                for o in executor.ex.fetch_open_orders(SYMBOL):
+                    if not (o.get('reduceOnly') or o.get('reduce_only')):
                         executor.ex.cancel_order(o['id'], SYMBOL)
-                        log(f'方向消失 → 撤限价单: {o["id"]}')
+                        log(f'方向消失 → 撤限价单: {o["id"][:16]}')
 
-            # 3. 方向反转 → 平旧仓
+            # 方向反转 → 平旧仓
             pos = executor.get_any_position()
             if pos and direction:
-                info = pos.get('info', {})
-                pos_side = info.get('positionSide', '')
-                if pos_side.upper() != direction:
+                pos_side = executor._get_pos_side(pos)
+                if pos_side and pos_side != direction:
                     log(f'方向反转: {pos_side} → {direction}')
                     executor.cancel_all_sl_tp()
-                    executor.close_position(pos_side.upper())
+                    executor.close_position(pos_side)
 
-            # 4. 开仓 (LLM二次确认)
+            # 开仓 (LLM二次确认)
             if direction and not executor.has_position(direction) and plan:
                 if executor.has_open_order(direction):
                     if executor.update_order_if_stale(plan):
                         state['last_signal'] = direction
                         save_state(state)
                 else:
-                    # LLM二次确认: 直接调DeepSeek API
                     try:
                         from llm_client import analyze as llm_analyze
                         from llm_review import _write_trade_log
                         import json as _json
-                
+
                         enrich = {}
                         epath = os.path.join(SCRIPT_DIR, 'market_enrich.json')
                         if os.path.exists(epath):
                             with open(epath) as _f:
                                 edata = _json.load(_f)
-                                enrich = edata.get('coins', {}).get('SOL', {})
-                
+                                enrich = edata.get('coins', {}).get('ETH', {})
+
                         indicators = {'price': price, 'atr': float(h4.get('atr',0)),
                                        'atr_pct': float(h4.get('atr_pct',0)),
                                        'raw': f'ADX={float(h4.get("adx",0)):.0f} +DI={float(h4.get("plus_di",0)):.0f} -DI={float(h4.get("minus_di",0)):.0f} price={price:.3f} ATR={float(h4.get("atr_pct",0)):.1f}%'}
-                
+
                         decision, reason = llm_analyze(
-                            'SOL', direction, plan['entry'], plan['sl'],
+                            'ETH', direction, plan['entry'], plan['sl'],
                             plan['tp'], POSITION_SIZE, LEVERAGE, indicators, enrich
                         )
-                
+
                         if decision == 'CONFIRMED':
-                            log(f'LLM确认: {reason[:60]}')
-                            _write_trade_log('SOL', 'CONFIRMED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
+                            log(f'✅ LLM确认: {reason[:60]}')
+                            _write_trade_log('ETH', 'CONFIRMED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
                             executor.open_position(plan)
                             state['last_signal'] = direction
                             save_state(state)
                         else:
-                            log(f'LLM否决: {reason[:60]}')
-                            _write_trade_log('SOL', 'REJECTED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
+                            log(f'❌ LLM否决: {reason[:60]}')
+                            _write_trade_log('ETH', 'REJECTED', reason, {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
                     except Exception as e:
                         log(f'LLM异常({e})，安全拒绝开仓')
-                        _write_trade_log('SOL', 'REJECTED', f'LLM异常: {str(e)[:60]}', {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
+                        try:
+                            _write_trade_log('ETH', 'REJECTED', f'LLM异常: {str(e)[:60]}', {'direction': direction, 'entry_price': plan['entry'], 'stop_loss': plan['sl'], 'take_profit': plan['tp'], 'qty': POSITION_SIZE, 'leverage': LEVERAGE})
+                        except:
+                            pass
+
             elapsed = time.time() - t0
             remaining = POLL_SECONDS - elapsed
             while remaining > 0:
