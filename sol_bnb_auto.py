@@ -40,8 +40,8 @@ TRADE_LOG = os.path.join(SCRIPT_DIR, 'sol_bn_trades.txt')  # 每笔开仓详细�
 
 # ── API 密钥 ──────────────────────────────────────
 
-API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
-API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
+API_KEY = 'YOUR_BINANCE_API_KEY'
+API_SECRET = 'YOUR_BINANCE_SECRET'
 
 
 # ── 日志 ──────────────────────────────────────────
@@ -445,6 +445,55 @@ class Executor:
             log(f'update_order_if_stale异常: {e}')
             return False
 
+
+    def _write_trail_state(self, plan):
+        try:
+            coin = SYMBOL.split("/")[0].lower()
+            entry_p = plan.get("entry", plan.get("entry_price", 0))
+            atr = plan.get("atr", 0)
+            state = {
+                "active": True, "direction": plan["direction"],
+                "entry_price": entry_p, "dynamic_tp": plan["tp"],
+                "position_size": plan.get("qty", POSITION_SIZE),
+                "peak_pnl": 0,
+                "min_profit": max(1.5 * atr / entry_p * 100, 2.0) if entry_p > 0 else 2.0,
+                "sl": plan["sl"],
+            }
+            import json as _j
+            path = os.path.join(SCRIPT_DIR, f"{coin}_trail_state.json")
+            with open(path, "w") as _f:
+                _j.dump(state, _f)
+        except:
+            pass
+
+    def _update_trail_tp(self, direction, new_tp):
+        try:
+            coin = SYMBOL.split("/")[0].lower()
+            path = os.path.join(SCRIPT_DIR, f"{coin}_trail_state.json")
+            import json as _j
+            if os.path.exists(path):
+                with open(path) as _f:
+                    state = _j.load(_f)
+                state["dynamic_tp"] = new_tp
+                with open(path, "w") as _f:
+                    _j.dump(state, _f)
+        except:
+            pass
+
+    def _clear_trail_state(self):
+        try:
+            coin = SYMBOL.split("/")[0].lower()
+            path = os.path.join(SCRIPT_DIR, f"{coin}_trail_state.json")
+            import json as _j
+            if os.path.exists(path):
+                with open(path) as _f:
+                    state = _j.load(_f)
+                state["active"] = False
+                with open(path, "w") as _f:
+                    _j.dump(state, _f)
+        except:
+            pass
+
     def close_position(self, position_side: str):
         """市价平仓"""
         try:
@@ -547,6 +596,7 @@ class Executor:
             })
             log('SL/TP 已挂载')
             self._pending_plan = None
+            self._write_trail_state(plan)
         except Exception as e:
             err = str(e)
             if '-4045' in err:
@@ -574,6 +624,7 @@ class Executor:
                         self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
                         log('SL/TP 已挂载(重试)')
                         self._pending_plan = None
+                        self._write_trail_state(plan)
                         return
                 except Exception as e2:
                     log(f'SL/TP重试也失败: {e2}')
@@ -709,6 +760,89 @@ def main():
             h4 = analyzer.data['4h'].iloc[-1]
             log(f'── 价格:{price:.0f} 方向:{direction or "观望"} '
                 f'ADX:{h4["adx"]:.0f} +DI:{h4["plus_di"]:.0f} -DI:{h4["minus_di"]:.0f}')
+
+
+            # ── 移动止盈管理 ──
+            pos = executor.get_any_position()
+            if pos and direction:
+                info = pos.get("info", {})
+                pos_side = info.get("positionSide", "")
+                entry_p = float(info.get("entryPrice", 0) or 0)
+                if entry_p > 0 and pos_side.upper() == direction:
+                    pnl_pct = (price - entry_p) / entry_p * 100
+                    if direction == "SHORT":
+                        pnl_pct = -pnl_pct
+                    atr_pct = float(h4["atr"]) / price * 100
+                    MIN_PROFIT = max(1.5 * atr_pct, 2.0)
+                    peak_key = f"peak_pnl_{direction}"
+                    peak_pnl = state.get(peak_key, 0)
+                    if pnl_pct > peak_pnl:
+                        peak_pnl = pnl_pct
+                        state[peak_key] = peak_pnl
+                        save_state(state)
+                    if peak_pnl > MIN_PROFIT and pnl_pct < peak_pnl * 0.5:
+                        log(f"利润回撤止盈！峰值{peak_pnl:.1f}%→{pnl_pct:.1f}%")
+                        executor.cancel_all_sl_tp()
+                        executor.close_position(direction)
+                        state.pop(peak_key, None)
+                        state.pop("last_signal", None)
+                        save_state(state)
+                        continue
+                    if pnl_pct >= MIN_PROFIT:
+                        try:
+                            current_tp = 0
+                            import requests as _rq3, hmac as _hm3, hashlib as _hl3, urllib.parse as _up3
+                            BASE3 = "https://fapi.binance.com"
+                            def _sign3(params):
+                                params["timestamp"] = int(time.time() * 1000)
+                                q3 = _up3.urlencode(params)
+                                params["signature"] = _hm3.new(API_SECRET.encode(), q3.encode(), _hl3.sha256).hexdigest()
+                                return params
+                            p3 = _sign3({"symbol": SYMBOL.replace("/USDT:USDT", "USDT")})
+                            hd3 = {"X-MBX-APIKEY": API_KEY}
+                            algos = _rq3.get(f"{BASE3}/fapi/v1/openAlgoOrders?{_up3.urlencode(p3)}", headers=hd3).json()
+                            if isinstance(algos, list):
+                                for a in algos:
+                                    if a.get("positionSide") == direction and a.get("orderType") == "TAKE_PROFIT_MARKET":
+                                        current_tp = float(a.get("stopPrice", 0))
+                                        break
+                            if current_tp > 0:
+                                from llm_client import manage_position as llm_manage
+                                indicators_raw = f"ADX={float(h4['adx']):.0f} +DI={float(h4['plus_di']):.0f} -DI={float(h4['minus_di']):.0f} price={price:.1f} pnl={pnl_pct:+.1f}% peak={peak_pnl:.1f}%"
+                                coin_name = SYMBOL.split("/")[0]
+                                result = llm_manage(
+                                    coin_name, direction, entry_p, price, current_tp,
+                                    float(h4["atr"]), indicators_raw
+                                )
+                                if result[0] in ("WIDEN", "TIGHTEN"):
+                                    new_tp = result[1]
+                                    reason = result[2] if len(result) > 2 else ""
+                                    action_cn = "放宽" if result[0] == "WIDEN" else "收紧"
+                                    log(f"LLM移动止盈: {current_tp:.1f}→{new_tp:.1f} [{action_cn}] {reason[:50]}")
+                                    import requests as _rq4, hmac as _hm4, hashlib as _hl4, urllib.parse as _up4
+                                    BASE4 = "https://fapi.binance.com"
+                                    def _sign4(params):
+                                        params["timestamp"] = int(time.time() * 1000)
+                                        q4 = _up4.urlencode(params)
+                                        params["signature"] = _hm4.new(API_SECRET.encode(), q4.encode(), _hl4.sha256).hexdigest()
+                                        return params
+                                    p4 = _sign4({"symbol": SYMBOL.replace("/USDT:USDT", "USDT")})
+                                    hd4 = {"X-MBX-APIKEY": API_KEY}
+                                    algos4 = _rq4.get(f"{BASE4}/fapi/v1/openAlgoOrders?{_up4.urlencode(p4)}", headers=hd4).json()
+                                    if isinstance(algos4, list):
+                                        for a in algos4:
+                                            if a.get("positionSide") == direction and a.get("orderType") == "TAKE_PROFIT_MARKET":
+                                                p5 = _sign4({"symbol": SYMBOL.replace("/USDT:USDT", "USDT"), "algoId": a["algoId"]})
+                                                _rq4.delete(f"{BASE4}/fapi/v1/algoOrder?{_up4.urlencode(p5)}", headers=hd4)
+                                                break
+                                    close_side = "buy" if direction == "SHORT" else "sell"
+                                    qty = abs(float(pos["info"].get("positionAmt", 0)))
+                                    executor.ex.create_order(SYMBOL, "TAKE_PROFIT_MARKET", close_side, qty, None, params={"stopPrice": new_tp, "positionSide": direction})
+                                    executor._update_trail_tp(direction, new_tp)
+                                elif result[0] == "KEEP":
+                                    log(f"LLM移动止盈: 维持 | 浮盈{pnl_pct:+.1f}%")
+                        except Exception as e:
+                            log(f"移动止盈异常: {e}")
 
             # 2. 检查已有成交的SL/TP
             executor.ensure_sl_tp()

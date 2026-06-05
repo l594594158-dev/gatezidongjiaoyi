@@ -23,8 +23,8 @@ STATE_FILE = os.path.join(SCRIPT_DIR, 'bnb_bn_state.json')
 LOG_FILE = os.path.join(SCRIPT_DIR, 'bnb_bn.log')
 TRADE_LOG = os.path.join(SCRIPT_DIR, 'bnb_bn_trades.txt')
 
-API_KEY = '1iUNLoIbEpVwwi4eHPTrKD25FvsYhR0iEwKLhDuvCOW7EgDa7h9B3PdpzffhghMB'
-API_SECRET = 'YWusnOHhS1OKHXJBJ57B3Q8zih6Ymhk6oK7CK4jJg3U9eOwcdyQ6eraCIaoVgIN6'
+API_KEY = 'YOUR_BINANCE_API_KEY'
+API_SECRET = 'YOUR_BINANCE_SECRET'
 
 def log(msg):
     ts = datetime.now().strftime('%H:%M:%S')
@@ -472,6 +472,7 @@ class Executor:
             self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
             log('SL/TP 已挂载')
             self._pending_plan = None
+            self._write_trail_state(plan)
         except Exception as e:
             err = str(e)
             if '-4045' in err:
@@ -499,6 +500,7 @@ class Executor:
                         self.ex.create_order(SYMBOL, 'TAKE_PROFIT_MARKET', cs, qty, None, params={'stopPrice': tp_p, 'positionSide': d})
                         log('SL/TP 已挂载(重试)')
                         self._pending_plan = None
+                        self._write_trail_state(plan)
                         return
                 except Exception as e2:
                     log(f'SL/TP重试也失败: {e2}')
