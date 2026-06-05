@@ -379,12 +379,16 @@ class Executor:
         self._pending_plan = None
 
     def _get_pos_side(self, pos):
-        """Gate: 双向持仓模式用 info.mode, 兼容 positionSide"""
+        """Gate: 双向持仓用 info.mode (dual_long/dual_short → LONG/SHORT)"""
         info = pos.get('info', {})
         if isinstance(info, dict):
             m = info.get('mode', '')
             if m:
-                return m.upper()
+                m = m.upper()
+                if 'SHORT' in m:
+                    return 'SHORT'
+                if 'LONG' in m:
+                    return 'LONG'
         return ''
 
     def has_position(self, direction: str) -> bool:
@@ -702,7 +706,7 @@ def make_exchange():
 
 def main():
     log('══════ SOL自动交易 启动 (Gate.io 10x) ══════')
-    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE} BTC  轮询: {POLL_SECONDS}s')
+    log(f'品种: {SYMBOL}  仓位: {POSITION_SIZE}张  轮询: {POLL_SECONDS}s')
 
     exchange = make_exchange()
     analyzer = Analyzer(exchange)
