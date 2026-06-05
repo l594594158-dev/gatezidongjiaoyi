@@ -775,8 +775,9 @@ def main():
                                 qty_tp = abs(float(pos.get('contracts', 0)))
                                 indicators_raw = f"ADX={float(h4['adx']):.0f} +DI={float(h4['plus_di']):.0f} -DI={float(h4['minus_di']):.0f} price={price:.1f} pnl={pnl_pct:+.1f}% peak={peak_pnl:.1f}%"
                                 coin_name = SYMBOL.split("/")[0]
+                                current_sl = executor._get_current_sl(direction)
                                 result = llm_manage(
-                                    coin_name, direction, entry_p, price, current_tp,
+                                    coin_name, direction, entry_p, price, current_tp, current_sl,
                                     float(h4["atr"]), indicators_raw
                                 )
                                 if result[0] in ("WIDEN", "TIGHTEN"):
