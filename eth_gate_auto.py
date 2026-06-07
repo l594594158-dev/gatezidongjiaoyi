@@ -619,7 +619,11 @@ class Executor:
             self._pending_plan = None
             self._write_trail_state(plan)
         except Exception as e:
-            log(f'SL/TP异常: {e}')
+            if 'ORDER_NOT_FOUND' in str(e):
+                log(f'限价单已不在(已成交/取消), 清除pending plan: {plan["order_id"]}')
+                self._pending_plan = None
+            else:
+                log(f'SL/TP异常: {e}')
 
     def ensure_naked_sl_tp(self):
         try:

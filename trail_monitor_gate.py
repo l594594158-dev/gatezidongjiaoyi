@@ -78,6 +78,10 @@ def main():
 
             direction = state['direction']
             entry_price = state['entry_price']
+            if entry_price <= 0:
+                log(f'{coin} entry_price=0 无效, 跳过')
+                time.sleep(POLL_SECONDS)
+                continue
             dynamic_tp = state.get('dynamic_tp', 0)
             position_size = state['position_size']
             peak_pnl = state.get('peak_pnl', 0)
